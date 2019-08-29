@@ -1,11 +1,9 @@
 import defaults from './state';
 
-import { programMap } from './shaders';
-
 import Assets from './assets';
 
 import Graphics from './graphics';
-import makeView from './view';
+import makeView from './view/main';
 import makeCtrl from './ctrl';
 import Loop from 'loopz';
 
@@ -14,7 +12,7 @@ import * as events from './events';
 export function app(element, options) {
 
   const canvas = document.createElement('canvas'),
-        gl = canvas.getContext('webgl2');
+        ctx = canvas.getContext('2d');
   element.append(canvas);
   const displayWidth = canvas.clientWidth,
         displayHeight = canvas.clientHeight;
@@ -32,9 +30,7 @@ export function app(element, options) {
         bounds: canvas.getBoundingClientRect()
       };
 
-      let graphics = new Graphics(state, gl);
-
-      graphics.makePrograms(programMap);
+      let graphics = new Graphics(state, ctx);
 
       let ctrl = new makeCtrl(state, graphics);
       let view = new makeView(ctrl, graphics, assets);
@@ -42,8 +38,8 @@ export function app(element, options) {
       new Loop(delta => {
         ctrl.update(delta);
         ctrl.data.views = view.render(ctrl);
-        graphics.render();
-        view.release();
+        //graphics.render();
+        //view.release();
       }, 60).start();
 
       events.bindDocument(ctrl);
@@ -58,7 +54,7 @@ export function app(element, options) {
           }
         });
         module.hot.accept
-        (['./view'], function() 
+        (['./view/main'], function() 
          {
            try {
              view = new makeView(ctrl, graphics, assets);
