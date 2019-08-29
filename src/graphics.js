@@ -1,16 +1,32 @@
-export default function graphics(state, ctx) {
+function createContext(width, height) {
+  const canvas = document.createElement('canvas'),
+        ctx = canvas.getContext('2d');
 
+  return ctx;
+};
 
+export default function graphics(state, screenCtx) {
 
-  this.draw = f => f(ctx);
+  const { width, height } = state.game;
 
-  this.rect = ({ x, y, width, height }, color) => {
+  this.buffers = {
+    Screen: screenCtx,
+    Collision: createContext(width, height)
+  };
+
+  this.renderTarget = this.buffers.Screen;
+
+  this.draw = f => f(this.renderTarget);
+
+  this.rect = ({ x, y, width, height }, color) => 
+  this.draw(ctx => {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, width, height);
-  };
+  });
     
 
-  this.transform = ({ translate, rotate, scale }, f) => {
+  this.transform = ({ translate, rotate, scale }, f) =>
+  this.draw(ctx => {
     ctx.save();
 
     if (translate) {
@@ -27,6 +43,6 @@ export default function graphics(state, ctx) {
     f(ctx);
 
     ctx.restore();
-  };
+  });
   
 }

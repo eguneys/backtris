@@ -19,7 +19,6 @@ export function app(element, options) {
   canvas.width = displayWidth;
   canvas.height = displayHeight;
 
-
   new Assets({
     'glyps': 'assets/font_10.png'
   }).start()

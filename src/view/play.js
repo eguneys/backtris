@@ -40,14 +40,25 @@ export default function view(ctrl, g) {
       translate: [nextX, 
                   nextY + shapeHeight * nextI]
     }, () => {
-      
       next.tiles.forEach(pos => {
         renderTile(ctrl, {
           x: pos[0] * (tileWidth + tileGap),
           y: pos[1] * (tileWidth + tileGap)
         });
       });
+    });
 
+    //g.renderTarget = g.buffers.Collision;
+
+    g.transform({
+      translate: [nextX,
+                  nextY + shapeHeight * nextI]
+    }, () => {
+
+      g.rect({ x: 0, y: 0,
+               width: shapeHeight,
+               height: shapeHeight }, 'black');
+      
     });
 
   };
@@ -65,6 +76,7 @@ export default function view(ctrl, g) {
   };
 
   const renderTiles = ctrl => {
+
     g.transform({
       translate: [tilesX, tilesY]
     }, () => {
