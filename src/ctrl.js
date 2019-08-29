@@ -16,21 +16,6 @@ export default function ctrl(state, g) {
 
   this.play.init(this);
 
-  this.spaceHit = () => {
-    if (this.data.state === u.States.Play) {
-      this.play.hero.userJump();
-    } else {
-      this.play.init(this);
-      this.data.state = u.States.Play;
-    }
-  };
-
-  this.spaceRelease = () => {
-    if (this.data.state === u.States.Play) {
-      this.play.hero.userReleaseJump();
-    }
-  };
-
   this.update = delta => {
     this.data.tick += delta;
 

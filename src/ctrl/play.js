@@ -11,7 +11,6 @@ export default function ctrl(ctrl, g) {
   let play;
   this.init = () => {
     this.data.gameover = 0;
-    this.data.level = 0;
     this.data.score = 0;
 
     this.tiles.init();    
@@ -21,21 +20,12 @@ export default function ctrl(ctrl, g) {
     this.init();
   };
 
-  
-
-  const maybeIncreaseLevel = u.withDelay(() => {
-    if (this.data.gameover === 0) {
-      ctrl.data.level++;
-    }
-  }, 2000);
 
   const maybeUpdateScore = delta => {
     
   };
 
   this.update = delta => {
-
-    maybeIncreaseLevel(delta);
     maybeUpdateScore(delta);
 
     this.tiles.update(delta);

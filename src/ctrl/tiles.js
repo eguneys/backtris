@@ -14,7 +14,8 @@ export default function tiles(ctrl, g) {
       tiles: {},
       next: [
         shapeToPosInfo(cu.getShape(cu.randomShapeKey())),
-        shapeToPosInfo(cu.getShape(cu.randomShapeKey()))
+        shapeToPosInfo(cu.getShape(cu.randomShapeKey())),
+        shapeToPosInfo(cu.getShape(cu.randomShapeKey())),
       ]
     };
   };
