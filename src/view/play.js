@@ -36,34 +36,21 @@ export default function view(ctrl, g) {
     const tileCtrl = ctrl.play.tiles;
     const next = tileCtrl.data.next[nextI];
 
-    g.transform({
+    const transform = g.makeTransform({
       translate: [nextX, 
                   nextY + shapeHeight * nextI]
-    }, () => {
-      next.tiles.forEach(pos => {
-        renderTile(ctrl, {
-          x: pos[0] * (tileWidth + tileGap),
-          y: pos[1] * (tileWidth + tileGap)
-        });
+    });
+
+    next.tiles.forEach(pos => {
+      renderTile(ctrl, {
+        x: pos[0] * (tileWidth + tileGap),
+        y: pos[1] * (tileWidth + tileGap),
+        transform
       });
     });
-
-    //g.renderTarget = g.buffers.Collision;
-
-    g.transform({
-      translate: [nextX,
-                  nextY + shapeHeight * nextI]
-    }, () => {
-
-      g.rect({ x: 0, y: 0,
-               width: shapeHeight,
-               height: shapeHeight }, 'black');
-      
-    });
-
   };
 
-  const renderTile = (ctrl, { x, y }) => {
+  const renderTile = (ctrl, { x, y, transform }) => {
 
     const color = co.css(coTile.alp(0.1));
 
@@ -71,22 +58,23 @@ export default function view(ctrl, g) {
       x,
       y,
       width: tileWidth,
-      height: tileWidth
+      height: tileWidth,
+      transform
     }, color);
   };
 
   const renderTiles = ctrl => {
 
-    g.transform({
+    const transform = g.makeTransform({
       translate: [tilesX, tilesY]
-    }, () => {
+    });
 
-      cu.allPos.forEach(pos => {
+    cu.allPos.forEach(pos => {
 
-        renderTile(ctrl, {
-          x: pos[0] * (tileWidth + tileGap),
-          y: pos[1] * (tileWidth + tileGap)
-        });
+      renderTile(ctrl, {
+        x: pos[0] * (tileWidth + tileGap),
+        y: pos[1] * (tileWidth + tileGap),
+        transform
       });
     });
   };

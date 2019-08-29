@@ -18,24 +18,28 @@ export default function graphics(state, screenCtx) {
 
   this.draw = f => f(this.renderTarget);
 
-  this.rect = ({ x, y, width, height }, color) => 
-  this.draw(ctx => {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, width, height);
-  });
-    
+  const withT = f => (props, ...args) => {
+    if (props.transform) {
+      props.transform(this.renderTarget, () => f(props, ...args));
+    } else {
+      f(props, ...args);
+    }
+  };
 
-  this.transform = ({ translate, rotate, scale }, f) =>
-  this.draw(ctx => {
+  this.rect = withT(({ x, y, width, height }, color) =>
+    this.draw(ctx => {
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, width, height);
+    }));
+
+  const applyTransform = (f, ctx, { translate, rotate, scale }) => {
     ctx.save();
-
     if (translate) {
       ctx.translate(translate[0], translate[1]);
     }
     if (rotate) {
       ctx.rotate(rotate);
     }
-
     if (scale) {
       ctx.scale(scale[0], scale[1]);
     }
@@ -43,6 +47,16 @@ export default function graphics(state, screenCtx) {
     f(ctx);
 
     ctx.restore();
-  });
+  };
+
+  this.makeTransform = (props) => (ctx, f) => {
+    if (props.transform) {
+      props.transform(ctx, () => {
+        applyTransform(f, ctx, props);
+      });
+    } else {
+      applyTransform(f, ctx, props);
+    }
+  };
   
 }
