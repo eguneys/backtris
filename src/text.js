@@ -49,74 +49,35 @@ var fontInfo = {
   },
 };
 
+export function drawText({ text, x, y, transform }, g, image) {
 
-export function makeVerticesForString(s) {
-  var len = s.length;
-  var numVertices = len * 6;
-  var positions = new Float32Array(numVertices * 2);
-  var texcoords = new Float32Array(numVertices * 2);
-  var offset = 0;
-  var x = 0;
-  var maxX = fontInfo.textureWidth;
-  var maxY = fontInfo.textureHeight;
-  for (var ii = 0; ii < len; ++ii) {
-    var letter = s[ii];
-    var glyphInfo = fontInfo.glyphInfos[letter];
-    if (glyphInfo) {
-      var x2 = x + glyphInfo.width;
-      var u1 = glyphInfo.x / maxX;
-      var v1 = (glyphInfo.y + fontInfo.letterHeight - 1) / maxY;
-      var u2 = (glyphInfo.x + glyphInfo.width - 1) / maxX;
-      var v2 = glyphInfo.y / maxY;
+  let dx = x,
+      dy = y;
+  
+  text.split('').forEach(letter => {
 
-      // 6 vertices per letter
-      positions[offset + 0] = x;
-      positions[offset + 1] = 0;
-      texcoords[offset + 0] = u1;
-      texcoords[offset + 1] = v1;
+    let { x: sx, y: sy, width: sWidth } = fontInfo.glyphInfos[letter];
+    let sHeight = fontInfo.letterHeight;
 
-      positions[offset + 2] = x2;
-      positions[offset + 3] = 0;
-      texcoords[offset + 2] = u2;
-      texcoords[offset + 3] = v1;
 
-      positions[offset + 4] = x;
-      positions[offset + 5] = fontInfo.letterHeight;
-      texcoords[offset + 4] = u1;
-      texcoords[offset + 5] = v2;
+    let dWidth = sWidth,
+        dHeight = sHeight;
 
-      positions[offset + 6] = x;
-      positions[offset + 7] = fontInfo.letterHeight;
-      texcoords[offset + 6] = u1;
-      texcoords[offset + 7] = v2;
 
-      positions[offset + 8] = x2;
-      positions[offset + 9] = 0;
-      texcoords[offset + 8] = u2;
-      texcoords[offset + 9] = v1;
+    const bounds = g.image({
+      image,
+      sx,
+      sy,
+      sWidth,
+      sHeight,
+      dx,
+      dy,
+      dWidth,
+      dHeight,
+      transform
+    });
 
-      positions[offset + 10] = x2;
-      positions[offset + 11] = fontInfo.letterHeight;
-      texcoords[offset + 10] = u2;
-      texcoords[offset + 11] = v2;
+    dx += bounds.width;
+  });
 
-      x += glyphInfo.width + fontInfo.spacing;
-      offset += 12;
-    } else {
-      // we don't have this character so just advance
-      x += fontInfo.spaceWidth;
-    }
-  }
-
-  // return ArrayBufferViews for the portion of the TypedArrays
-  // that were actually used.
-  return {
-    arrays: {
-      position: new Float32Array(positions.buffer, 0, offset),
-      texcoord: new Float32Array(texcoords.buffer, 0, offset),
-    },
-    numVertices: offset / 2,
-    width: x,
-    height: fontInfo.letterHeight
-  };
-}
+};

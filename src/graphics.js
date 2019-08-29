@@ -9,6 +9,8 @@ export default function graphics(state, screenCtx) {
 
   const { width, height } = state.game;
 
+  this.noop = _ => {};
+
   this.buffers = {
     Screen: screenCtx,
     Collision: createContext(width, height)
@@ -16,45 +18,77 @@ export default function graphics(state, screenCtx) {
 
   this.renderTarget = this.buffers.Screen;
 
-  this.draw = (f, transform) => {
+  this.draw = (f, dims, transform) => {
+    let cT = this.renderTarget.currentTransform;
     if (transform) {
-      transform(this.renderTarget, f);
+      cT = transform(this.renderTarget, f, dims);
     } else {
-      f(this.renderTarget);
+      f(this.renderTarget, dims);
     }
+    return boundsAfterCurrentTransform(dims, cT);
   };
 
   this.rect = ({ x, y, width, height, transform }, color) =>
   this.draw(ctx => {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, width, height);
-  }, transform);
+  }, {x, y, width, height}, transform);
 
-  const applyTransform = (f, ctx, { translate, rotate, scale }) => {
-    ctx.save();
-    if (translate) {
-      ctx.translate(translate[0], translate[1]);
-    }
-    if (rotate) {
-      ctx.rotate(rotate);
-    }
-    if (scale) {
-      ctx.scale(scale[0], scale[1]);
-    }
+  this.image = ({ image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight, transform }) =>
+  this.draw(ctx => {
+    ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
+  }, { x: dx, y: dy, width: dWidth, height: dHeight }, transform);
 
-    f(ctx);
-
-    ctx.restore();
-  };
-
-  this.makeTransform = (props) => (ctx, f) => {
+  this.makeTransform = (props) => (ctx, f, dims) => {
     if (props.transform) {
-      props.transform(ctx, () => {
-        applyTransform(f, ctx, props);
-      });
+      return props.transform(ctx, () =>
+        applyTransform(f, ctx, props, dims), 
+        dims);
     } else {
-      applyTransform(f, ctx, props);
+      return applyTransform(f, ctx, props, dims);
     }
   };
   
+}
+
+function applyTransform(f,
+                        ctx,
+                        { translate, rotate, scale },
+                        dims) {
+
+  const { x, y, width, height } = dims,
+        cx = x + 0.5 * width,
+        cy = y + 0.5 * height;
+
+  ctx.save();
+  if (translate) {
+    ctx.translate(translate[0], translate[1]);
+  }
+  if (rotate) {
+    ctx.translate(cx, cy);
+    ctx.rotate(rotate);
+    ctx.translate(-cx, -cy);
+  }
+  if (scale) {
+    ctx.translate(cx, cy);
+    ctx.scale(scale[0], scale[1]);
+    ctx.translate(-cx, -cy);
+  }
+
+  let ct = ctx.currentTransform;
+
+  f(ctx, dims);
+
+  ctx.restore();
+  return ct;
+};
+
+
+function boundsAfterCurrentTransform(bounds, ct) {
+  return { 
+    x: ct.e + bounds.x * ct.a,
+    y: ct.f + bounds.y * ct.d,
+    width: bounds.width * ct.a,
+    height: bounds.height * ct.d
+  };
 }

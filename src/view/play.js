@@ -3,7 +3,9 @@ import * as u from '../util';
 
 import * as cu from '../ctrl/util';
 
-export default function view(ctrl, g) {
+import * as text from '../text';
+
+export default function view(ctrl, g, assets) {
 
   const { width, height } = ctrl.data.game;
 
@@ -21,7 +23,8 @@ export default function view(ctrl, g) {
   const nextX = tilesX + tilesWidth + tileGap * nbCols,
         nextY = tilesY;
 
-  const shapeHeight = tileWidth * 3.5;
+  const shapeHeight = tileWidth * 4 + tileGap * 4,
+        shapeWidth = shapeHeight;
 
   const coTile = co.shifter(co.Palette.SwanWhite);
   const coBg = co.shifter(co.Palette.CrocTooth);
@@ -55,20 +58,16 @@ export default function view(ctrl, g) {
           transform
         }, color);
 
-        g.draw(ctx => {
-          let bounds = {
-            i: i,
-            x,
-            y,
-            width: tileWidth,
-            height: tileWidth
-          };
-
-          applyTransform(bounds, ctx.currentTransform);
-
-          vTiles.push(bounds);
+        const bounds = g.draw(g.noop, {
+          x,
+          y,
+          width: tileWidth,
+          height: tileWidth
         }, transform);
 
+        bounds.i = i;
+
+        vTiles.push(bounds);
       });
       
       
@@ -81,9 +80,12 @@ export default function view(ctrl, g) {
     const tileCtrl = ctrl.play.tiles;
     const next = tileCtrl.data.next[nextI];
 
+    const x = nextX,
+          y = nextY + shapeHeight * 0.6 * nextI;
+
     const transform = g.makeTransform({
-      translate: [nextX, 
-                  nextY + shapeHeight * 0.6 * nextI],
+      translate: [x, 
+                  y],
       scale: [0.6, 0.6]
     });
 
@@ -99,38 +101,31 @@ export default function view(ctrl, g) {
 
     const color = co.css(coTile.alp(alpha));
 
-    next.tiles.forEach(pos => {
-      const x = pos[0] * (tileWidth + tileGap),
-            y = pos[1] * (tileWidth + tileGap);
+    g.draw(ctx => {
 
-      renderTile(ctrl, {
-        x, 
-        y,
-        transform
-      }, color);
+      next.tiles.forEach(pos => {
+        const x = pos[0] * (tileWidth + tileGap),
+              y = pos[1] * (tileWidth + tileGap);
 
-      g.draw(ctx => {
-
-        let bounds = {
-          x,
-          y,
-          width: tileWidth,
-          height: tileWidth
-        };
-
-        applyTransform(bounds, ctx.currentTransform);
+        const bounds = renderTile(ctrl, {
+          x, 
+          y
+        }, color);
 
         views.push(bounds);
-        
-      }, transform);
-    });
+      });
+    }, {
+      x: 0, y: 0,
+      width: shapeWidth,
+      height: shapeWidth
+    }, transform);
 
     return views;
   };
 
   const renderTile = (ctrl, { x, y, transform }, color) => {
 
-    g.rect({
+    return g.rect({
       x,
       y,
       width: tileWidth,
@@ -169,18 +164,13 @@ export default function view(ctrl, g) {
         transform
       }, co.css(color));
 
-      g.draw(ctx => {
-
-        let bounds = {
-          x, y,
-          width: tileWidth,
-          height: tileWidth
-        };
-
-        applyTransform(bounds, ctx.currentTransform);
-
-        vTiles[key] = bounds;
+      const bounds = g.draw(g.noop, { 
+        x, y,
+        width: tileWidth,
+        height: tileWidth
       }, transform);
+      vTiles[key] = bounds;
+
     });
 
     return vTiles;
@@ -212,6 +202,16 @@ export default function view(ctrl, g) {
       height: tileWidth
     };
 
+
+    const lScale = 4.0;
+    const transform = g.makeTransform({
+      scale: [lScale, lScale],
+    });
+
+    
+    text.drawText({ text: 'restart', x, y, transform }, g, assets['font']);
+
+
     return views;
   };
 
@@ -242,11 +242,4 @@ export default function view(ctrl, g) {
     return views;
   };
 
-}
-
-function applyTransform(bounds, ct) {
-  bounds.x = ct.e + bounds.x * ct.a;
-  bounds.y = ct.f + bounds.y * ct.d;
-  bounds.width = bounds.width * ct.a;
-  bounds.height = bounds.height * ct.d;
 }
