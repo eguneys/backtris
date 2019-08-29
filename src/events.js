@@ -2,12 +2,12 @@ import { Moves } from './ctrl';
 
 import * as drag from './drag';
 
-export function bindDocument(ctrl) {
+export function bindDocument(ctrl, g) {
   const unbinds = [];
 
-  const onMouseDown = withEvent(ctrl, drag.start),
-        onMouseUp = withEvent(ctrl, drag.cancel),
-        onMouseMove = withEvent(ctrl, drag.move);
+  const onMouseDown = withEvent(ctrl, g, drag.start),
+        onMouseUp = withEvent(ctrl, g, drag.cancel),
+        onMouseMove = withEvent(ctrl, g, drag.move);
 
   unbinds.push(unbindable(document, 'mousedown', onMouseDown));
   unbinds.push(unbindable(document, 'mouseup', onMouseUp));
@@ -22,8 +22,8 @@ function unbindable(el, eventName, callback) {
   return () => el.removeEventListener(eventName, callback);
 }
 
-function withEvent(ctrl, withDrag) {
+function withEvent(ctrl, g, withDrag) {
   return function(e) {
-    withDrag(ctrl, e);
+    withDrag(ctrl, g, e);
   };
 }

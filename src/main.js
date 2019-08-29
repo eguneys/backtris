@@ -41,7 +41,7 @@ export function app(element, options) {
         //view.release();
       }, 60).start();
 
-      events.bindDocument(ctrl);
+      events.bindDocument(ctrl, graphics);
 
 
       if (module.hot) {

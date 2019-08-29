@@ -16,21 +16,19 @@ export default function graphics(state, screenCtx) {
 
   this.renderTarget = this.buffers.Screen;
 
-  this.draw = f => f(this.renderTarget);
-
-  const withT = f => (props, ...args) => {
-    if (props.transform) {
-      props.transform(this.renderTarget, () => f(props, ...args));
+  this.draw = (f, transform) => {
+    if (transform) {
+      transform(this.renderTarget, f);
     } else {
-      f(props, ...args);
+      f(this.renderTarget);
     }
   };
 
-  this.rect = withT(({ x, y, width, height }, color) =>
-    this.draw(ctx => {
-      ctx.fillStyle = color;
-      ctx.fillRect(x, y, width, height);
-    }));
+  this.rect = ({ x, y, width, height, transform }, color) =>
+  this.draw(ctx => {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, width, height);
+  }, transform);
 
   const applyTransform = (f, ctx, { translate, rotate, scale }) => {
     ctx.save();

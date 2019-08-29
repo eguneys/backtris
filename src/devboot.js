@@ -1,4 +1,5 @@
 require('./index.css');
+require('./polyfill');
 
 const main = require('./main');
 

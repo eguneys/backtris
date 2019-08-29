@@ -2,13 +2,13 @@ import { objFind } from './util2';
 
 import * as u from './util';
 
-export function start(ctrl, e) {
+export function start(ctrl, g, e) {
   let s = ctrl.data;
 
   let position = eventPositionInBounds(e, s.bounds);
   const nextIndex = getNextIndexAtPosition(s, position);
 
-  if (nextIndex) {
+  if (nextIndex !== null) {
     s.draggable.current = {
       nextIndex,
       epos: position
@@ -22,7 +22,7 @@ export function start(ctrl, e) {
   }
 };
 
-export function cancel(ctrl, e) {
+export function cancel(ctrl, g, e) {
   let s = ctrl.data;
 
   const cur = ctrl.data.draggable.current;
@@ -32,7 +32,7 @@ export function cancel(ctrl, e) {
   }
 };
 
-export function move(ctrl, e) {
+export function move(ctrl, g, e) {
   let s = ctrl.data;
 
   const cur = s.draggable.current;
@@ -40,9 +40,9 @@ export function move(ctrl, e) {
 
   if (cur) {
     cur.epos = position;
-    const { tiles } = s.views.next[cur.nextIndex];
+    const nextDrag = s.views.play.nextDrag;
 
-    cur.tiles = tiles.map(_ => ({
+    cur.tiles = nextDrag.map(_ => ({
       key: getTileKeyAtPosition(s, _),
       tileI: _.i
     }));
@@ -66,8 +66,10 @@ function eventPositionInBounds(e, bounds) {
 function getTileKeyAtPosition(s, pos) {
   const views = s.views;
 
-  return objFind(views.tiles, (key, tile) => {
-    return isInside(tile, pos.x + pos.width * 0.5, pos.y + pos.height * 0.5);
+  return objFind(views.play.tiles, (key, tile) => {
+    return isInside(tile,
+                    pos.x + pos.width * 0.5,
+                    pos.y + pos.height * 0.5);
   });
 }
 
@@ -78,7 +80,7 @@ function getRestartAtPosition(s, pos) {
     return false;
   }
 
-  if (isInside(views.restart, pos[0], pos[1])) {
+  if (isInside(views.play.restart, pos[0], pos[1])) {
     return true;
   }
   return false;
@@ -89,20 +91,23 @@ function getNextIndexAtPosition(s, pos) {
         left = pos[0],
         top = pos[1];
 
-  if (!s.views) {
+  if (!views) {
     return null;
   }
 
-  return Object.keys(views.next).find(key => {
-    const { tiles } = views.next[key];
+  let foundI = null;
 
-    return tiles.some(box => {
+  views.play.next.find((next, i) => {
+    if (next.some(box => {
       if (isInside(box, left, top)) {
         return true;
       }
       return false;
-    });
+    })) {
+      foundI = i;
+    }
   });
+  return foundI;
 }
 
 function isInside(box, x, y) {

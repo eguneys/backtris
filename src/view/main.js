@@ -11,8 +11,11 @@ export default function view(ctrl, g) {
       ctx.clearRect(0, 0, width, height);
     });
 
-    play.render(ctrl);
+    let views = {};
 
+    views.play = play.render(ctrl);
+
+    return views;
   };
 
 }
