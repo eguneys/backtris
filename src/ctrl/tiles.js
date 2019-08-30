@@ -89,11 +89,11 @@ export default function tiles(ctrl, g) {
           let fulls = mvs.map(_ => this.data.tiles[_])
             .filter(_ => !!_);
 
-          if (fulls.length === 3) {
-              // &&
-              // fulls[0].letter === 'a' &&
-              // fulls[1].letter === 'c' &&
-              // fulls[2].letter === 'k') {
+          if (fulls.length === 3
+              &&
+              fulls[0].letter === 'a' &&
+              fulls[1].letter === 'c' &&
+              fulls[2].letter === 'k') {
            
             let fallingKeys = [b, ...mvs];
 
@@ -138,7 +138,7 @@ function makeFalling(ctrl) {
   this.update = delta => {
     const dt = delta * 0.01;
 
-    this.data.mergeT += dt * 0.1;
+    this.data.mergeT += dt * 1.0;
 
     if (this.data.mergeT > 1.0) {
       this.data.mergeT = 0.0;

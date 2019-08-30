@@ -3,6 +3,8 @@ import * as u from '../util';
 
 import * as cu from '../ctrl/util';
 
+import * as p from '../paths';
+
 import * as text from '../text';
 
 export default function view(ctrl, g, assets) {
@@ -35,6 +37,9 @@ export default function view(ctrl, g, assets) {
     'cyan': co.shifter(co.Palette.CelGreen),
     'red': co.shifter(co.Palette.FluRed)
   };
+
+  const pWidth = tileWidth * 0.1 * 10,
+        pHeight = pWidth;
 
   const renderNextDrag = (ctrl) => {
     const tileCtrl = ctrl.play.tiles;
@@ -139,12 +144,34 @@ export default function view(ctrl, g, assets) {
     }, color);
   };
 
-  const renderMergeTile = (ctrl, { x, y }, color) => {
+  const renderMergeTile = (ctrl, { x, y, c1, angle }, color) => {
+
+    const mergePath = p.merge({
+      hb: tileWidth,
+      h1: -5,
+      h2: -10,
+      h3: 0,
+      i1: 10,
+      i2: 20,
+      c1,
+      radius: tileWidth * 0.100
+    });
+
+    const transform = g.makeTransform({
+      translate: [x, y],
+      rotate: angle
+    });
+
+    g.path({ path: mergePath, x: 0, y: 0, width: pWidth, height: pHeight, transform }, color);
+
+  };
+
+  const renderMergingTile = (ctrl, { x, y, width, height }, color) => {
     g.rect({
       x,
       y,
-      width: tileWidth,
-      height: tileWidth
+      width,
+      height
     }, color);
   };
 
@@ -244,9 +271,13 @@ export default function view(ctrl, g, assets) {
           fromPos = cu.key2pos(fromKey),
           toPos = cu.key2pos(toKey);
 
+    if (!mergeFrom.color) {
+      console.warn('undefined falling tile');
+    }
+
     let mergeRest = [];
 
-    for (let i = falling.data.merge + 1; i < 4; i++) {
+    for (let i = falling.data.merge + 2; i < 4; i++) {
       mergeRest.push({
         mergeFrom: falling.data.falling[i-1],
         ...falling.data.falling[i]
@@ -260,7 +291,6 @@ export default function view(ctrl, g, assets) {
 
     const mergeX = fromX + (toX - fromX) * mergeT,
           mergeY = fromY + (toY - fromY) * mergeT;
-
 
     const color = coTiles[mergeFrom.color].alp(0.0);
 
@@ -291,9 +321,33 @@ export default function view(ctrl, g, assets) {
 
       });
 
+
+      let angle;
+
+      if (fromPos[0] === toPos[0]) {
+        angle = 0;
+        if (fromPos[1] < toPos[1]) {
+          angle = u.PI;
+        }
+      } else {
+        angle = u.PI * 0.5;
+        if (fromPos[0] > toPos[0]) {
+          angle *= -1;
+        }
+      }
+
+      renderMergingTile(ctrl, {
+        x: toX,
+        y: toY,
+        width: tileWidth,
+        height: tileWidth
+      }, co.css(color));
+
       renderMergeTile(ctrl, {
         x: mergeX,
         y: mergeY,
+        angle,
+        c1: mergeT
       }, co.css(color));
 
     }, { x: 0,

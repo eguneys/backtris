@@ -28,6 +28,12 @@ export default function graphics(state, screenCtx) {
     return boundsAfterCurrentTransform(dims, cT);
   };
 
+  this.path = ({ path, x, y, width, height, transform }, color) =>
+  this.draw(ctx => {
+    ctx.fillStyle = color;
+    ctx.fill(path);
+  }, { x, y, width, height }, transform);
+
   this.rect = ({ x, y, width, height, transform }, color) =>
   this.draw(ctx => {
     ctx.fillStyle = color;

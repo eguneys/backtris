@@ -80,7 +80,7 @@ function getTileKeyAtPosition(s, pos) {
 function getRestartAtPosition(s, pos) {
   const views = s.views;
 
-  if (!views) {
+  if (!views || !views.play) {
     return false;
   }
 
@@ -95,7 +95,7 @@ function getNextIndexAtPosition(s, pos) {
         left = pos[0],
         top = pos[1];
 
-  if (!views) {
+  if (!views || !views.play) {
     return null;
   }
 
