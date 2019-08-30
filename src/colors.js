@@ -3,7 +3,11 @@ import * as convert from './rgba';
 export const Palette = {
   Blue: 0xff0000ff,
   SwanWhite: 0xfff7f1e3,
-  CrocTooth: 0xffd1ccc0
+  CrocTooth: 0xffd1ccc0,
+  SummerSky: 0xff34ace0,
+  Pumpkin: 0xffff793f,
+  CelGreen: 0xff33d9b2,
+  FluRed: 0xffff5252
 };
 
 export const arr = rgba => {

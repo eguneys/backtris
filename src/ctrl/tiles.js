@@ -9,6 +9,8 @@ import * as finder from './finder';
 
 export default function tiles(ctrl, g) {
 
+  this.falling = new Pool(id => new makeFalling(this));
+
   this.init = d => {
     this.data = {
       tiles: {},
@@ -26,6 +28,7 @@ export default function tiles(ctrl, g) {
     if (this.data.placeTiles) {
       this.data.placeTiles.forEach(({ key, tileI }) => {
         this.data.tiles[key] = {
+          color: this.data.next[nextI].color,
           letter: this.data.next[nextI].letters[tileI]
         };
       });
@@ -86,12 +89,25 @@ export default function tiles(ctrl, g) {
           let fulls = mvs.map(_ => this.data.tiles[_])
             .filter(_ => !!_);
 
-          if (fulls.length === 3 &&
-              fulls[0].letter === 'a' &&
-              fulls[1].letter === 'c' &&
-              fulls[2].letter === 'k') {
+          if (fulls.length === 3) {
+              // &&
+              // fulls[0].letter === 'a' &&
+              // fulls[1].letter === 'c' &&
+              // fulls[2].letter === 'k') {
            
-            [...mvs, b].forEach(_ => delete this.data.tiles[_]);
+            let fallingKeys = [b, ...mvs];
+
+            let falling = fallingKeys.map(_ => ({
+              key: _,
+              ...this.data.tiles[_]
+            }));
+
+            fallingKeys.forEach(_ => delete this.data.tiles[_]);
+
+
+            this.falling.acquire(_ => _.init({
+              falling
+            }));
 
             ctrl.data.score++;
           }
@@ -105,8 +121,38 @@ export default function tiles(ctrl, g) {
     updateDragInfo(delta);
     maybeRemoveTiles(delta);
 
+    this.falling.each(_ => _.update(delta));
 
   };
  
 }
 
+
+function makeFalling(ctrl) {
+  
+  this.init = (d) => {
+    this.data = { ...defaults(), ...d };
+  };
+
+
+  this.update = delta => {
+    const dt = delta * 0.01;
+
+    this.data.mergeT += dt * 0.1;
+
+    if (this.data.mergeT > 1.0) {
+      this.data.mergeT = 0.0;
+      this.data.merge++;
+
+      if (this.data.merge === 3) {
+        ctrl.falling.release(this);
+      }
+    }
+  };
+
+  const defaults = () => ({
+    merge: 0,
+    mergeT: 0
+  });
+  
+}

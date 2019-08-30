@@ -29,6 +29,13 @@ export default function view(ctrl, g, assets) {
   const coTile = co.shifter(co.Palette.SwanWhite);
   const coBg = co.shifter(co.Palette.CrocTooth);
 
+  const coTiles = {
+    'blue': co.shifter(co.Palette.SummerSky),
+    'orange': co.shifter(co.Palette.Pumpkin),
+    'cyan': co.shifter(co.Palette.CelGreen),
+    'red': co.shifter(co.Palette.FluRed)
+  };
+
   const renderNextDrag = (ctrl) => {
     const tileCtrl = ctrl.play.tiles;
 
@@ -46,10 +53,10 @@ export default function view(ctrl, g, assets) {
         scale: [1.0, 1.0]
       });
 
-      const color = co.css(coTile.alp(0.5));
+      const alpha = 0.5;
 
       g.draw(ctx => {
-        views = renderShape(ctrl, next, color);
+        views = renderShape(ctrl, next, alpha);
       }, {
         x: 0, y: 0,
         width: shapeWidth,
@@ -77,19 +84,19 @@ export default function view(ctrl, g, assets) {
 
     let views;
 
-    let alpha = 0.3;
+    let alpha = 0.8;
 
     let curDrag = ctrl.data.draggable.current;
     
     if (curDrag && curDrag.nextIndex === nextI) {
-      alpha = 0.1;
+      alpha = 0.3;
     }
 
-    const color = co.css(coTile.alp(alpha));
+    const color = alpha;
 
     g.draw(ctx => {
 
-      views = renderShape(ctrl, next, color);
+      views = renderShape(ctrl, next, alpha);
 
     }, {
       x: 0, y: 0,
@@ -101,21 +108,44 @@ export default function view(ctrl, g, assets) {
     return views;
   };
 
-  const renderShape = (ctrl, shape, color) => {
+  const renderShape = (ctrl, shape, alpha) => {
     let views = [];
     shape.tiles.forEach((pos, i) => {
       const x = pos[0] * (tileWidth + tileGap),
             y = pos[1] * (tileWidth + tileGap);
 
+
+      const coTile = coTiles[shape.color],
+            colorRgb = coTile.alp(alpha);
+
+
       const bounds = renderTile(ctrl, {
         x, 
         y
-      }, color, shape.letters[i]);
+      }, co.css(colorRgb), shape.letters[i]);
 
       bounds.i = i;
       views.push(bounds);
     });
     return views;
+  };
+
+  const renderMergeConnect = (ctrl, { x, y, fromX, fromY }, color) => {
+    g.rect({
+      x: x - ((x===fromX)?0:tileGap),
+      y: y - ((y===fromY)?0:tileGap),
+      width: (x===fromX)?tileWidth:tileGap,
+      height: (y===fromY)?tileWidth:tileGap
+    }, color);
+  };
+
+  const renderMergeTile = (ctrl, { x, y }, color) => {
+    g.rect({
+      x,
+      y,
+      width: tileWidth,
+      height: tileWidth
+    }, color);
   };
 
   const renderTile = (ctrl, { x, y, offsetX, offsetY, transform }, color, letter) => {
@@ -166,33 +196,111 @@ export default function view(ctrl, g, assets) {
 
       let tile = tiles[key];
 
+
       let color = coTile.alp(0.1);
 
       if (placeTiles && placeTiles.some(_ => _.key === key)) {
         color = coTile.hue(0.2);
       }
 
+      if (tile) {
+        color = coTiles[tile.color].alp(0.0);
+      }
+
       const x = pos[0] * (tileWidth + tileGap),
             y = pos[1] * (tileWidth + tileGap);
 
-      renderTile(ctrl, {
-        x,
-        y,
-        offsetX: 110,
-        offsetY: 95,
-        transform
-      }, co.css(color), tile?tile.letter:null);
+      g.draw(_ => {
+        const bounds = renderTile(ctrl, {
+          x,
+          y
+        }, co.css(color), tile?tile.letter:null);
 
-      const bounds = g.draw(g.noop, { 
-        x, y,
-        width: tileWidth,
-        height: tileWidth
-      }, transform);
-      vTiles[key] = bounds;
-
+        vTiles[key] = bounds;
+      }, { x, y,
+           width: tileWidth,
+           height: tileWidth
+         }, transform);
     });
 
     return vTiles;
+  };
+
+  function tilePos(pos) {
+    return {
+      x: pos[0] * (tileWidth + tileGap),
+      y: pos[1] * (tileWidth + tileGap)
+    };
+  }
+
+  const renderFalling = (ctrl, falling) => {
+    const tilesCtrl = ctrl.play.tiles;
+
+    const mergeT = falling.data.mergeT,
+          mergeFrom = falling.data.falling[falling.data.merge],
+          mergeTo = falling.data.falling[falling.data.merge+1],
+          fromKey = mergeFrom.key,
+          toKey = mergeTo.key,
+          fromPos = cu.key2pos(fromKey),
+          toPos = cu.key2pos(toKey);
+
+    let mergeRest = [];
+
+    for (let i = falling.data.merge + 1; i < 4; i++) {
+      mergeRest.push({
+        mergeFrom: falling.data.falling[i-1],
+        ...falling.data.falling[i]
+      });
+    }
+
+    const fromX = fromPos[0] * (tileWidth + tileGap),
+          fromY = fromPos[1] * (tileWidth + tileGap),
+          toX = toPos[0] * (tileWidth + tileGap),
+          toY = toPos[1] * (tileWidth + tileGap);
+
+    const mergeX = fromX + (toX - fromX) * mergeT,
+          mergeY = fromY + (toY - fromY) * mergeT;
+
+
+    const color = coTiles[mergeFrom.color].alp(0.0);
+
+
+    const transform = g.makeTransform({
+      translate: [tilesX, tilesY]
+    });
+
+    g.draw(ctx => {
+
+      mergeRest.forEach(({ mergeFrom, key, letter }) => {
+        let pos = cu.key2pos(key);
+
+        const { x, y } = tilePos(pos);
+
+        let fromPos = tilePos(cu.key2pos(mergeFrom.key));
+
+        // renderMergeConnect(ctrl, {
+        //   x,
+        //   y,
+        //   fromX: fromPos.x,
+        //   fromY: fromPos.y
+        // }, co.css(color));
+
+        renderTile(ctrl, {
+          x, y
+        }, co.css(color), letter);
+
+      });
+
+      renderMergeTile(ctrl, {
+        x: mergeX,
+        y: mergeY,
+      }, co.css(color));
+
+    }, { x: 0,
+         y: 0, 
+         width: tilesWidth, 
+         height: tilesWidth 
+       }, transform);
   };
 
   const renderRestart = ctrl => {
@@ -277,6 +385,9 @@ export default function view(ctrl, g, assets) {
     views.tiles = renderTiles(ctrl);
 
     views.nextDrag = renderNextDrag(ctrl);
+
+    ctrl.play.tiles.falling.each(_ => 
+      renderFalling(ctrl, _));
 
     return views;
   };
