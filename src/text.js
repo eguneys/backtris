@@ -64,6 +64,9 @@ export function drawText({ text, x, y, transform }, g, image) {
         dHeight = sHeight;
 
 
+    sWidth -= 1;
+    sHeight -= 1;
+
     const bounds = g.image({
       image,
       sx,
@@ -77,7 +80,7 @@ export function drawText({ text, x, y, transform }, g, image) {
       transform
     });
 
-    dx += bounds.width;
+    dx += bounds.width * 0.8;
   });
 
 };

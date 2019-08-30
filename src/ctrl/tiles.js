@@ -91,7 +91,9 @@ export default function tiles(ctrl, g) {
               fulls[1].letter === 'c' &&
               fulls[2].letter === 'k') {
            
-            [...mvs, b].forEach(_ => delete this.data.tiles[_]);y 
+            [...mvs, b].forEach(_ => delete this.data.tiles[_]);
+
+            ctrl.data.score++;
           }
         });
     });

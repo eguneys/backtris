@@ -18,7 +18,7 @@ export default function view(ctrl, g, assets) {
         tileGap = tileWidth * 0.07;
 
   const tilesX = (width - tilesWidth) * 0.2,
-        tilesY = (height - tilesWidth) * 0.5;
+        tilesY = (height - tilesWidth) * 0.6;
 
   const nextX = tilesX + tilesWidth + tileGap * nbCols,
         nextY = tilesY;
@@ -34,7 +34,7 @@ export default function view(ctrl, g, assets) {
 
     const cur = ctrl.data.draggable.current;
 
-    let vTiles = [];
+    let views;
 
     if (cur) {
       const { nextIndex, epos } = cur,
@@ -48,32 +48,17 @@ export default function view(ctrl, g, assets) {
 
       const color = co.css(coTile.alp(0.5));
 
-      next.tiles.forEach((pos, i) => {
-        const x = pos[0] * (tileWidth + tileGap),
-              y = pos[1] * (tileWidth + tileGap);
-
-        renderTile(ctrl, {
-          x, 
-          y,
-          transform
-        }, color);
-
-        const bounds = g.draw(g.noop, {
-          x,
-          y,
-          width: tileWidth,
-          height: tileWidth
-        }, transform);
-
-        bounds.i = i;
-
-        vTiles.push(bounds);
-      });
-      
+      g.draw(ctx => {
+        views = renderShape(ctrl, next, color);
+      }, {
+        x: 0, y: 0,
+        width: shapeWidth,
+        height: shapeWidth
+      }, transform);      
       
     }
 
-    return vTiles;
+    return views;
   };
 
   const renderNext = (ctrl, nextI, hits) => {
@@ -89,7 +74,8 @@ export default function view(ctrl, g, assets) {
       scale: [0.6, 0.6]
     });
 
-    let views = [];
+
+    let views;
 
     let alpha = 0.3;
 
@@ -103,35 +89,63 @@ export default function view(ctrl, g, assets) {
 
     g.draw(ctx => {
 
-      next.tiles.forEach(pos => {
-        const x = pos[0] * (tileWidth + tileGap),
-              y = pos[1] * (tileWidth + tileGap);
+      views = renderShape(ctrl, next, color);
 
-        const bounds = renderTile(ctrl, {
-          x, 
-          y
-        }, color);
-
-        views.push(bounds);
-      });
     }, {
       x: 0, y: 0,
       width: shapeWidth,
       height: shapeWidth
     }, transform);
 
+
     return views;
   };
 
-  const renderTile = (ctrl, { x, y, transform }, color) => {
+  const renderShape = (ctrl, shape, color) => {
+    let views = [];
+    shape.tiles.forEach((pos, i) => {
+      const x = pos[0] * (tileWidth + tileGap),
+            y = pos[1] * (tileWidth + tileGap);
 
-    return g.rect({
+      const bounds = renderTile(ctrl, {
+        x, 
+        y
+      }, color, shape.letters[i]);
+
+      bounds.i = i;
+      views.push(bounds);
+    });
+    return views;
+  };
+
+  const renderTile = (ctrl, { x, y, offsetX, offsetY, transform }, color, letter) => {
+
+    offsetX = offsetX || 20.0;
+    offsetY = offsetY || offsetX;
+
+    let views = g.rect({
       x,
       y,
       width: tileWidth,
       height: tileWidth,
       transform
     }, color);
+
+    if (letter) {
+      text.drawText({ text: letter,
+                      x, 
+                      y,
+                      transform: g.makeTransform({
+                        translate: [offsetX, offsetY],
+                        scale: [4.0, 4.0]
+                      }) 
+                    }, 
+                    g,
+                    assets['font']);
+
+    }
+    
+    return views;
   };
 
   const renderTiles = ctrl => {
@@ -144,10 +158,13 @@ export default function view(ctrl, g, assets) {
 
     let vTiles = {};
 
-    let placeTiles = tileCtrl.data.placeTiles;
+    let tiles = tileCtrl.data.tiles,
+        placeTiles = tileCtrl.data.placeTiles;
 
     cu.allPos.forEach(pos => {
       const key = cu.pos2key(pos);
+
+      let tile = tiles[key];
 
       let color = coTile.alp(0.1);
 
@@ -161,8 +178,10 @@ export default function view(ctrl, g, assets) {
       renderTile(ctrl, {
         x,
         y,
+        offsetX: 110,
+        offsetY: 95,
         transform
-      }, co.css(color));
+      }, co.css(color), tile?tile.letter:null);
 
       const bounds = g.draw(g.noop, { 
         x, y,
@@ -203,8 +222,10 @@ export default function view(ctrl, g, assets) {
     };
 
 
-    const lScale = 4.0;
+    const lOffset = 20.0,
+          lScale = 4.0;
     const transform = g.makeTransform({
+      translate: [lOffset, lOffset],
       scale: [lScale, lScale],
     });
 
@@ -213,6 +234,22 @@ export default function view(ctrl, g, assets) {
 
 
     return views;
+  };
+
+  const renderScore = ctrl => {
+
+    const score = ctrl.play.data.score;
+
+    const x = tilesX + tilesWidth * 0.5,
+          y = height * 0.05;
+
+    const transform = g.makeTransform({
+      translate: [0, 0],
+      scale: [4.0, 4.0],
+    });
+
+    text.drawText({ text: score + '', x, y, transform }, g, assets['font']);
+    
   };
 
   this.render = ctrl => {
@@ -233,11 +270,13 @@ export default function view(ctrl, g, assets) {
     views.next[1] = renderNext(ctrl, 1);
     views.next[2] = renderNext(ctrl, 2);
 
+    renderScore(ctrl);
+
     views.restart = renderRestart(ctrl);
 
-    views.nextDrag = renderNextDrag(ctrl);
-
     views.tiles = renderTiles(ctrl);
+
+    views.nextDrag = renderNextDrag(ctrl);
 
     return views;
   };

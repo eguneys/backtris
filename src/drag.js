@@ -39,8 +39,12 @@ export function move(ctrl, g, e) {
   const position = eventPositionInBounds(e, s.bounds);
 
   if (cur) {
-    cur.epos = position;
     const nextDrag = s.views.play.nextDrag;
+    cur.epos = position;
+
+    if (!nextDrag) {
+      return;
+    }
 
     cur.tiles = nextDrag.map(_ => ({
       key: getTileKeyAtPosition(s, _),
