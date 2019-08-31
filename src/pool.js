@@ -42,6 +42,12 @@ export default function Pool(makeItem, opts) {
 
   };
 
+  this.acquireLimit = (onInit, limit) => {
+    while (this.alives() < limit) {
+      this.acquire(onInit);
+    }
+  };
+
   this.release = (item) => {
     let i = alive.indexOf(item);
     if (i > -1) {

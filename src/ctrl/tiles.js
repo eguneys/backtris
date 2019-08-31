@@ -2,10 +2,10 @@ import { objFilter } from '../util2';
 
 import Pool from '../pool';
 
-import * as cu from './util';
 import * as u from '../util';
 
-import * as finder from './finder';
+import makeHero from './hero';
+
 
 export default function tiles(ctrl, g) {
 
@@ -15,8 +15,13 @@ export default function tiles(ctrl, g) {
     warnLeak: 10000
   });
 
+
+  this.hero = new makeHero(ctrl, g);
+
   this.init = d => {
     this.data = {};
+
+    this.hero.init();
   };
 
   const maybeSpawnEdges = delta => {
@@ -38,6 +43,7 @@ export default function tiles(ctrl, g) {
 
     this.edges.each(_ => _.update(delta));
 
+    this.hero.update(delta);
   };
  
 }
@@ -45,23 +51,18 @@ export default function tiles(ctrl, g) {
 
 function makeEdge(ctrl) {
 
+  const { camera } = ctrl;
+
   const { width, height, holeRadius } = ctrl.data.game;
 
   const tilesCtrl = ctrl.play.tiles;
 
-  let fov = width * 0.8,
-      pCX = width * 0.5 ,
-      pCY = height * 0.5;
-  
   this.init = (d) => {
-    this.data = { ...defaults(), ...d };
-  };
-
-  const project = (v3) => {
-    let pScale = fov / (fov + v3[2]);
-
-    return [v3[0] * pScale + pCX,
-            v3[1] * pScale + pCY];
+    this.data = { 
+      yOffset: u.rand(0, holeRadius * 0.4),
+      xOffset: u.rand(0, holeRadius * 0.4),
+      zSpeed: u.rand(0, 1),
+      ...d };
   };
 
   const updateProject = () => {
@@ -70,13 +71,14 @@ function makeEdge(ctrl) {
 
     let length = 10-this.data.alpha * this.data.alpha * 5;
     
-    length *= u.usin(Math.cos(tick * 0.005));
+    // length *= u.usin(Math.cos(tick * 0.001));
+    length *= this.data.zSpeed* 0.5;
 
-    let p1 = project([this.data.x,
+    let p1 = camera.project([this.data.x,
                       this.data.y,
                       this.data.z - length]);
 
-    let p2 = project([this.data.x,
+    let p2 = camera.project([this.data.x,
                       this.data.y,
                       this.data.z + length]);
 
@@ -93,10 +95,10 @@ function makeEdge(ctrl) {
   const updatePos = delta => {
 
     this.data.theta += delta * 0.01 * 0.1;
-    this.data.z += delta * 0.1;
+    this.data.z += delta * 0.05 + this.data.zSpeed * delta * 0.1;
 
-    this.data.x = Math.cos(this.data.theta) * holeRadius;
-    this.data.y = Math.sin(this.data.theta) * holeRadius;
+    this.data.x = Math.cos(this.data.theta) * holeRadius + this.data.xOffset;
+    this.data.y = Math.sin(this.data.theta) * holeRadius + this.data.yOffset;
 
     this.data.alpha = u.smoothstep(-width*0.8, -width*0.5, this.data.z);
 
@@ -116,9 +118,4 @@ function makeEdge(ctrl) {
     maybeKillEdge();
 
   };
-
-  const defaults = () => ({
-
-  });
-  
 }

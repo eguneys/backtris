@@ -1,8 +1,6 @@
 import * as co from '../colors';
 import * as u from '../util';
 
-import * as cu from '../ctrl/util';
-
 import * as p from '../paths';
 
 import * as text from '../text';

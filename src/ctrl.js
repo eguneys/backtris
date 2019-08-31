@@ -2,6 +2,8 @@ import * as u from './util';
 
 import Pool from './pool';
 
+import makeCamera from './camera';
+
 import makePlay from './ctrl/play';
 
 export default function ctrl(state, g) {
@@ -11,6 +13,8 @@ export default function ctrl(state, g) {
   });
 
   this.data = { ...defaults(), ...state };
+
+  this.camera = new makeCamera(this);
 
   this.play = new makePlay(this, g);
 

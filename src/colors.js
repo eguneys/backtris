@@ -1,5 +1,7 @@
 import * as convert from './rgba';
 
+import { memoize2 } from './util2';
+
 export const Palette = {
   Blue: 0xff0000ff,
   SwanWhite: 0xfff7f1e3,
@@ -45,6 +47,8 @@ export const css = rgba => {
 export function shifter(rgba) {
   let [h, s, l, a] = hsla(rgba);
 
+  const base = [h, s, l, a];
+
   // https://stackoverflow.com/a/57539098/3994249
   function shift(a, b) {
     let r = (a + b);
@@ -56,6 +60,13 @@ export function shifter(rgba) {
     return this;
   };
 
+  this.reset = fluent(_ => {
+    h = base[0];
+    s = base[1];
+    l = base[2];
+    a = base[3];
+  });
+                      
   this.hue = fluent(dv => h = shift(h, dv));
 
   this.sat = fluent(dv => s = shift(s, dv));

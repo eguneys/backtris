@@ -1,3 +1,29 @@
+export function memoize(fn) {
+  let cache = {};
+
+  return function(arg) {
+    const key = arg;
+
+    if (!cache.hasOwnProperty(key)) {
+      cache[key] = fn(arg);
+    }
+    return cache[key];
+  };
+}
+
+export function memoize2(fn) {
+  let cache = {};
+
+  return function(a, b, c, d) {
+    const key = `${a}-${b}-${c}-${d}`;
+
+    if (!cache.hasOwnProperty(key)) {
+      cache[key] = fn(a, b, c, d);
+    }
+    return cache[key];
+  };
+}
+
 export function objMap(obj, f) {
   return Object.keys(obj).reduce((acc, _) => ({
     [_]: f(_, obj[_]),

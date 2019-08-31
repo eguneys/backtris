@@ -1,5 +1,5 @@
 import * as u from './util';
-import * as cu from './ctrl/util';
+
 
 export default function defaults(width, height) {
 

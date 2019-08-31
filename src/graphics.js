@@ -44,8 +44,11 @@ export default function graphics(state, screenCtx) {
   this.draw(ctx => {
     ctx.drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight);
   }, { x: dx, y: dy, width: dWidth, height: dHeight }, transform);
+}
 
-  this.makeTransform = (props) => (ctx, f, dims) => {
+
+export function makeTransform(props) {
+  return (ctx, f, dims) => {
     if (props.transform) {
       return props.transform(ctx, () =>
         applyTransform(f, ctx, props, dims), 
@@ -54,8 +57,8 @@ export default function graphics(state, screenCtx) {
       return applyTransform(f, ctx, props, dims);
     }
   };
-  
 }
+
 
 function applyTransform(f,
                         ctx,
