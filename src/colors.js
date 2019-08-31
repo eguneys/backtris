@@ -43,7 +43,7 @@ export const css = rgba => {
 };
 
 export function shifter(rgba) {
-  const [h, s, l, a] = hsla(rgba);
+  let [h, s, l, a] = hsla(rgba);
 
   // https://stackoverflow.com/a/57539098/3994249
   function shift(a, b) {
@@ -51,10 +51,17 @@ export function shifter(rgba) {
     return r === 1 ? 1 : r % 1;
   }
 
-  return {
-    hue: (dv) => hslToRgba(shift(h, dv), s, l, a),
-    sat: (dv) => hslToRgba(h, shift(s, dv), l, a),
-    lum: (dv) => hslToRgba(h, s, shift(l, dv), a),
-    alp: (dv) => hslToRgba(h, s, l, shift(a/255, dv) * 255)
+  const fluent = f => (...args) => {
+    f(...args);
+    return this;
   };
+
+  this.hue = fluent(dv => h = shift(h, dv));
+
+  this.sat = fluent(dv => s = shift(s, dv));
+  this.lum = fluent(dv => l = shift(l, dv));
+  this.alp = fluent(dv => a = shift(a/255, dv) * 255);
+
+  this.rgba = () => hslToRgba(h, s, l, a);
+  this.css = () => css(this.rgba());
 }

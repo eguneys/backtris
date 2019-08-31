@@ -9,150 +9,116 @@ import * as finder from './finder';
 
 export default function tiles(ctrl, g) {
 
-  this.falling = new Pool(id => new makeFalling(this));
+  const { width, height } = ctrl.data.game;
+
+  this.edges = new Pool(id => new makeEdge(ctrl), {
+    warnLeak: 10000
+  });
 
   this.init = d => {
-    this.data = {
-      tiles: {},
-      next: [
-        shapeToPosInfo(cu.getShape(cu.randomShapeKey())),
-        shapeToPosInfo(cu.getShape(cu.randomShapeKey())),
-        shapeToPosInfo(cu.getShape(cu.randomShapeKey())),
-      ]
-    };
+    this.data = {};
   };
 
-  this.commitTile = () => {
-    const nextI = ctrl.data.draggable.current.nextIndex;
-
-    if (this.data.placeTiles) {
-      this.data.placeTiles.forEach(({ key, tileI }) => {
-        this.data.tiles[key] = {
-          color: this.data.next[nextI].color,
-          letter: this.data.next[nextI].letters[tileI]
-        };
-      });
-
-      this.data.next[nextI] = shapeToPosInfo(cu.getShape(cu.randomShapeKey()));
-    } else {
-      
-      let {shape} = this.data.next[nextI];
-
-      //shape = cu.rotateShape(shape);
-      //this.data.next[nextI].shape = shape;
-      //this.data.next[nextI].tiles = cu.shapeToPosMap(shape);
-      this.data.next[nextI] = shapeToPosInfo(cu.getShape(cu.randomShapeKey()));
-
-    }
-  };
-
-  const shapeToPosInfo = (shape) => {
-    return {
-      shape,
-      color: shape.color,
-      letters: cu.shapeToPosMap(shape).map(cu.randomLetter),
-      tiles: cu.shapeToPosMap(shape)
-    };
-  };
-
-  const updateDragInfo = delta => {
-    
-    const cur = ctrl.data.draggable.current;
-
-    delete this.data.placeTiles;
-
-    if (cur && cur.tiles) {
-      if (cur.tiles.every(canPlaceTile)) {
-        this.data.placeTiles = cur.tiles;
+  const maybeSpawnEdges = delta => {
+    if (this.edges.alives() < 2000) {
+      for (let i = 0; i < 10; i++) {
+        this.edges.acquire(_ => _.init({
+          speed: u.rand(0, 1),
+          theta: u.rand(0, u.TAU),
+          z: -width*0.78
+        }));
       }
     }
   };
 
-  const canPlaceTile = tile => {
-    if (!tile) return false;
-
-    if (this.data.tiles[tile.key]) {
-      return false;
-    }
-    return true;
-  };
-
-  const maybeRemoveTiles = delta => {
-
-    const bs = Object.keys(
-      objFilter(this.data.tiles, (k, v) => v.letter === 'b'));
-
-    bs.forEach(b => {
-      finder.movementVector(b)
-        .forEach(mvs => {
-
-          let fulls = mvs.map(_ => this.data.tiles[_])
-            .filter(_ => !!_);
-
-          if (fulls.length === 3
-              &&
-              fulls[0].letter === 'a' &&
-              fulls[1].letter === 'c' &&
-              fulls[2].letter === 'k') {
-           
-            let fallingKeys = [b, ...mvs];
-
-            let falling = fallingKeys.map(_ => ({
-              key: _,
-              ...this.data.tiles[_]
-            }));
-
-            fallingKeys.forEach(_ => delete this.data.tiles[_]);
-
-
-            this.falling.acquire(_ => _.init({
-              falling
-            }));
-
-            ctrl.data.score++;
-          }
-        });
-    });
-
-  };
 
   this.update = delta => {
 
-    updateDragInfo(delta);
-    maybeRemoveTiles(delta);
+    maybeSpawnEdges(delta);
 
-    this.falling.each(_ => _.update(delta));
+    this.edges.each(_ => _.update(delta));
 
   };
  
 }
 
 
-function makeFalling(ctrl) {
+function makeEdge(ctrl) {
+
+  const { width, height, holeRadius } = ctrl.data.game;
+
+  const tilesCtrl = ctrl.play.tiles;
+
+  let fov = width * 0.8,
+      pCX = width * 0.5 ,
+      pCY = height * 0.5;
   
   this.init = (d) => {
     this.data = { ...defaults(), ...d };
   };
 
+  const project = (v3) => {
+    let pScale = fov / (fov + v3[2]);
 
-  this.update = delta => {
-    const dt = delta * 0.01;
+    return [v3[0] * pScale + pCX,
+            v3[1] * pScale + pCY];
+  };
 
-    this.data.mergeT += dt * 1.0;
+  const updateProject = () => {
 
-    if (this.data.mergeT > 1.0) {
-      this.data.mergeT = 0.0;
-      this.data.merge++;
+    const { tick } = ctrl.data;
 
-      if (this.data.merge === 3) {
-        ctrl.falling.release(this);
-      }
+    let length = 10-this.data.alpha * this.data.alpha * 5;
+    
+    length *= u.usin(Math.cos(tick * 0.005));
+
+    let p1 = project([this.data.x,
+                      this.data.y,
+                      this.data.z - length]);
+
+    let p2 = project([this.data.x,
+                      this.data.y,
+                      this.data.z + length]);
+
+    if (Math.abs(p1[0] - p2[0]) > 100) {
+      // debugger;
+    }
+    
+    this.data.projects = [
+      p1, p2
+    ];
+
+  };
+
+  const updatePos = delta => {
+
+    this.data.theta += delta * 0.01 * 0.1;
+    this.data.z += delta * 0.1;
+
+    this.data.x = Math.cos(this.data.theta) * holeRadius;
+    this.data.y = Math.sin(this.data.theta) * holeRadius;
+
+    this.data.alpha = u.smoothstep(-width*0.8, -width*0.5, this.data.z);
+
+  };
+
+  const maybeKillEdge = () => {
+    if (this.data.z > -width*0.5) {
+      tilesCtrl.edges.release(this);
     }
   };
 
+  this.update = delta => {
+
+    updatePos(delta);
+    updateProject();
+
+    maybeKillEdge();
+
+  };
+
   const defaults = () => ({
-    merge: 0,
-    mergeT: 0
+
   });
   
 }

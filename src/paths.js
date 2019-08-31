@@ -2,31 +2,33 @@ import * as u from './util';
 
 export function circle(ctx, opts) {
 
-  opts = { ... {
-    radius: 40,
-    c1: 1.0
-  }, ...opts };
+  const { width, height } = opts;
 
-  let { c1, radius } = opts;
-
-  let r2 = radius +  radius * c1 * 2.4;
+  const nbTiles = 20;
+  const stepWidth = width / nbTiles,
+        stepHeight = height / nbTiles;
 
   const path = new Path2D();
-  path.arc(0, radius * 2.0, r2, 0, u.PI, false);
 
 
-  const clip = new Path2D();
-  clip.rect(-radius, radius * 2.0, radius * 2.0, radius);
-  ctx.clip(clip);
-
-  ctx.save();
-  ctx.translate(0, -c1 * radius * 3.0);
-
+  for (let i = 0; i < width; i += stepWidth) {
+    for (let j = 0; j < height; j+= stepHeight) {
+      path.moveTo(i, j);
+      path.arc(i, j, 2, 0, u.PI * 2.0, false);
+    }
+  }
+  
   ctx.fill(path);
+}
 
-  ctx.restore();
+export function hexa(size) {
+  const path = new Path2D();
 
+  for (let i = 0; i < 7; i++) {
+    path.lineTo(size * Math.cos(i * 2 * Math.PI / 6), size * Math.sin(i * 2 * Math.PI / 6));
+  }
 
+  return path;
 }
 
 //   const hb = 200,
