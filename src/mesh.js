@@ -14,6 +14,9 @@ export default function mesh(camera, geometry, dims) {
     theta: [0, 0, 0],
     ...dims };
 
+  this.width = dims.width;
+  this.height = dims.height;
+
   let modelMatrix = mat4.identity();
 
   this.geometry = () => {

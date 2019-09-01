@@ -1,6 +1,7 @@
 import makeMesh from '../mesh';
 import * as geo from '../geometry';
 import makePhysics from '../physics';
+import makeLife from '../life';
 
 import * as u from '../util';
 
@@ -75,24 +76,4 @@ function makeParticle(ctrl, explosion) {
     life.update(delta);
   };
   
-}
-
-function makeLife(onDie = () => {}, opts) {
-
-  opts = { life: 3, ...opts };
-
-  let life = opts.life;
-
-
-  this.alpha = () => life / opts.life;
-
-  this.update = delta => {
-    life -= delta * 0.01;
-
-    if (life < 0) {
-      onDie();
-    }
-  };
-  
- 
 }

@@ -1,41 +1,62 @@
+import makeMesh from '../mesh';
+import * as geo from '../geometry';
+import makeEntity from '../entity';
+
 import * as u from '../util';
 
 import Pool from '../pool';
 
-export default function hero(ctrl, g) {
+export default function hero(ctrl) {
  
   const { camera } = ctrl;
-  const { width, height, holeRadius } = ctrl.data.game;
+  const { width, height } = ctrl.data.game;
 
-  this.bullets = new Pool(id => new makeBullet(ctrl, this));
+  this.bullets = new makeBullet(ctrl, this);
 
   this.init = d => {
-    this.data = { theta: u.PI * 0.5, 
-                  z: camera.near + width * 0.2,
-                  ...d };
-  };
+    this.data = { ...d };
 
-
-  this.project = () => {
-    let vertex = [
-      this.data.x,
-      this.data.y,
-      this.data.z
-    ];
-    return camera.project(vertex);
-  };
-
-  const updatePos = delta => {
-
-    this.data.x = Math.cos(this.data.theta) * holeRadius * 2.0;
-    this.data.y = Math.sin(this.data.theta) * holeRadius * 2.0;
-
+    this.bullets.init({});
   };
 
   this.update = delta => {
-
-    updatePos(delta);
    
+    this.bullets.update(delta);
   };
  
+}
+
+function makeBullet(ctrl) {
+
+  const { camera } = ctrl;
+  const { width, height } = ctrl.data.game;
+
+  let bWidth = 10;
+
+  let geometry = geo.cubeGeometry(bWidth);
+  this.mesh = new makeMesh(camera, geometry, {
+    width: bWidth,
+    height: bWidth
+  });
+
+  this.entity = new makeEntity
+  (ctrl, this.mesh, () => {
+    
+  });
+
+  let phy = this.entity.physics;
+
+
+  this.init = d => {
+    this.data = { ...d };
+
+    phy.pos({ x: -width*0.5 });
+    phy.acc({ y: -100 });
+    phy.vel({ x: 100 });
+  };
+
+  this.update = delta => {
+    this.entity.update(delta);
+  };
+
 }

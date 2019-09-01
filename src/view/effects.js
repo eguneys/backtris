@@ -17,9 +17,6 @@ export default function view(ctrl, g) {
 
 
   const colB = new co.shifter(co.Palette.FluRed).css();
-
-  const colDot = new co.shifter(co.Palette.CrocTooth).css();
-
   
   function renderMesh(ctrl, mesh) {
 
@@ -39,13 +36,15 @@ export default function view(ctrl, g) {
       });
       
     });
-
   }
 
   function renderExplosion(ctrl, explosion) {
-
     explosion.particles.each(_ => renderMesh(ctrl, _.mesh));
+  }
 
+
+  function renderHero(ctrl, hero) {
+    renderMesh(ctrl, hero.bullets.mesh);
   }
 
   this.render = ctrl => {
@@ -55,6 +54,8 @@ export default function view(ctrl, g) {
     g.draw(ctx => {
 
       renderExplosion(ctrl, tilesCtrl.explosion);
+
+      renderHero(ctrl, tilesCtrl.hero);
 
     }, { x: 0, y: 0, width, height }, transform);
 
