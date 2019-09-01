@@ -42,13 +42,19 @@ export default function view(ctrl, g) {
 
   }
 
+  function renderExplosion(ctrl, explosion) {
+
+    explosion.particles.each(_ => renderMesh(ctrl, _.mesh));
+
+  }
+
   this.render = ctrl => {
 
     const tilesCtrl = ctrl.play.tiles;
 
     g.draw(ctx => {
 
-      renderMesh(ctrl, tilesCtrl.explosion.mesh);
+      renderExplosion(ctrl, tilesCtrl.explosion);
 
     }, { x: 0, y: 0, width, height }, transform);
 
