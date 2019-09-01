@@ -16,20 +16,22 @@ export default function view(ctrl, g) {
   });
 
 
-  const colB = new co.shifter(co.Palette.FluRed);
+  const colB = new co.shifter(co.Palette.FluRed).css();
 
-  const colDot = new co.shifter(co.Palette.CrocTooth);
+  const colDot = new co.shifter(co.Palette.CrocTooth).css();
 
   
   const renderDot = (ctrl, dot) => {
-    g.draw(ctx => {
-      colDot.reset();
+    const sT = u.usin(ctrl.data.tick * 0.01);
 
-      ctx.strokeStyle = 
-        colDot
-        .lum(1.0 - dot.data.alpha * 0.77)
-        .alp(1.0 - dot.data.alpha * 0.2)
-        .css();
+    g.draw(ctx => {
+      // ctx.strokeStyle = 
+      //   colDot
+      //   .reset()
+      //   .lum(1.0 - dot.data.alpha * 0.27)
+      //   .hue(-dot.data.alpha * sT)
+      //   .alp(1.0 - dot.data.alpha * 0.2)
+      //   .css();
 
       const from = dot.data.projects[0],
             to = dot.data.projects[1];
@@ -55,10 +57,6 @@ export default function view(ctrl, g) {
                                 bullet.data.z]);
 
     g.draw(ctx => {
-      ctx.strokeStyle = colB.css();
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-
       ctx.beginPath();
       ctx.moveTo(fromP[0], fromP[1]);
       ctx.lineTo(toP[0], toP[1]);
@@ -73,7 +71,34 @@ export default function view(ctrl, g) {
     const tilesCtrl = ctrl.play.tiles;
     const heroCtrl = tilesCtrl.hero;
 
+    g.raw(ctx => {
+      ctx.strokeStyle = colB;
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+    });
+
     heroCtrl.bullets.each(_ => renderBullet(ctrl, _));
+
+  }
+
+  function renderBlock(ctrl, block) {
+
+    let { view, lines } = block.geometry();
+
+    g.draw(ctx => {
+
+      lines.forEach(line => {
+
+        let v1 = view[line[0]],
+            v2 = view[line[1]];
+
+        ctx.moveTo(v1[0], v1[1]);
+        ctx.lineTo(v2[0], v2[1]);
+        //ctx.stroke();
+        ctx.stroke();
+      });
+      
+    });
 
   }
 
@@ -83,7 +108,13 @@ export default function view(ctrl, g) {
 
     g.draw(ctx => {
 
+      g.raw(ctx => {
+        ctx.strokeStyle = colDot;
+      });
+
       tilesCtrl.edges.each(_ => renderDot(ctrl, _));
+
+      tilesCtrl.blocks.each(_ => renderBlock(ctrl, _));
 
       renderHero(ctrl);
 

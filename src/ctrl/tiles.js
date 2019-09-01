@@ -6,6 +6,8 @@ import * as u from '../util';
 
 import makeHero from './hero';
 
+import makeBlock from './block';
+
 
 export default function tiles(ctrl, g) {
 
@@ -18,6 +20,10 @@ export default function tiles(ctrl, g) {
 
   this.hero = new makeHero(ctrl, g);
 
+
+  this.blocks = new Pool(id => new makeBlock(ctrl));
+  
+
   this.init = d => {
     this.data = {};
 
@@ -25,7 +31,7 @@ export default function tiles(ctrl, g) {
   };
 
   const maybeSpawnEdges = delta => {
-    if (this.edges.alives() < 2000) {
+    if (this.edges.alives() < 50) {
       for (let i = 0; i < 10; i++) {
         this.edges.acquire(_ => _.init({
           speed: u.rand(0, 1),
@@ -36,12 +42,46 @@ export default function tiles(ctrl, g) {
     }
   };
 
+  const maybeSpawnBlock = u.withDelay(_ => {
+    this.blocks.acquire(_ => _.init({
+      theta: u.rand(0, u.TAU)
+    }));
+  }, 1000);
+
+  const updateCollisions = delta => {
+
+    this.blocks.each(block => {
+      const { z , theta } = block.data;
+
+      this.hero.bullets.each(bullet => {
+        const { z: z2, theta: theta2 } = bullet.data;
+
+        if (Math.abs(z - z2) < 50) {
+          if (Math.abs(theta - theta2) < 0.02) {
+
+            this.hero.bullets.release(bullet);
+            this.blocks.release(block);
+            console.log("hit");
+
+          }
+        }
+
+      });
+    });
+
+  };
+
 
   this.update = delta => {
 
     maybeSpawnEdges(delta);
+    maybeSpawnBlock(delta);
+
+    updateCollisions(delta);
 
     this.edges.each(_ => _.update(delta));
+
+    this.blocks.each(_ => _.update(delta));
 
     this.hero.update(delta);
   };
@@ -95,6 +135,7 @@ function makeEdge(ctrl) {
   const updatePos = delta => {
 
     this.data.theta += delta * 0.01 * 0.1;
+
     this.data.z += delta * 0.05 + this.data.zSpeed * delta * 0.1;
 
     this.data.x = Math.cos(this.data.theta) * holeRadius + this.data.xOffset;

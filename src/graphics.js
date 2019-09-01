@@ -18,6 +18,8 @@ export default function graphics(state, screenCtx) {
 
   this.renderTarget = this.buffers.Screen;
 
+  this.raw = f => f(this.renderTarget);
+
   this.draw = (f, dims, transform) => {
     let cT = this.renderTarget.currentTransform;
     if (transform) {
@@ -25,7 +27,11 @@ export default function graphics(state, screenCtx) {
     } else {
       f(this.renderTarget, dims);
     }
-    return boundsAfterCurrentTransform(dims, cT);
+    if (dims) {
+      return boundsAfterCurrentTransform(dims, cT);
+    } else {
+      return null;
+    }
   };
 
   this.path = ({ path, x, y, width, height, transform }, color) =>

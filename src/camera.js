@@ -1,3 +1,5 @@
+import * as u from './util';
+
 export default function Camera(ctrl) {
 
   const { width, height } = ctrl.data.game;
@@ -6,6 +8,12 @@ export default function Camera(ctrl) {
       pCX = width * 0.5 ,
       pCY = height * 0.5;
 
+
+  let iCX = pCX,
+      iCY = pCY;
+
+  let tX = pCX,
+      tY = pCY;
 
   this.far = -width*0.5;
   this.near = -width*0.78;
@@ -17,4 +25,26 @@ export default function Camera(ctrl) {
     return [v3[0] * pScale + pCX,
             v3[1] * pScale + pCY];
   };
+
+  const maybeMove = u.withDelay(() => {
+    tX = u.rand(width * 0.3, width * 0.7);
+    tY = u.rand(height * 0.3, height * 0.7);
+  }, 3000);
+
+  this.update = delta => {
+    const { tick } = ctrl.data;
+
+    iCX = interpolate(iCX, tX);
+    iCY = interpolate(iCY, tY);
+
+    pCX = interpolate(pCX, iCX);
+    pCY = interpolate(pCY, iCY);
+
+    maybeMove(delta);
+
+  };
+}
+
+function interpolate(a, b) {
+  return a + (b - a) * 0.01;
 }
