@@ -23,7 +23,7 @@ export function multiplyVec(a, v) {
   for (let i = 0; i < 4; i++) {
     let sum = 0;
     for (let j = 0; j < 4; j++) {
-      sum += a[i * 4 + j] * v[j];
+      sum += a[j * 4 + i] * v[j];
     }
     res[i] = sum;
   }

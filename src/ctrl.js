@@ -22,19 +22,14 @@ export default function ctrl(state, g) {
 
   this.pressKey = key => {
     if (key === 'left') {
-      this.play.tiles.hero.move(1);
+      this.play.tiles.move(1);
     } else if (key === 'right') {
-      this.play.tiles.hero.move(-1);
+      this.play.tiles.move(-1);
     }
   };
 
-  this.releaseKey = key => {
-    if (key === 'left') {
-      this.play.tiles.hero.stop(1);
-    } else if (key === 'right') {
-      this.play.tiles.hero.stop(-1);
-    }
-  };
+  this.releaseKey = _ => {};
+
 
   this.update = delta => {
     this.data.tick += delta;

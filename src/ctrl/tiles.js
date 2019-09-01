@@ -11,6 +11,8 @@ import makeBlock from './block';
 
 export default function tiles(ctrl, g) {
 
+  const { camera } = ctrl;
+  
   const { width, height } = ctrl.data.game;
 
   this.edges = new Pool(id => new makeEdge(ctrl), {
@@ -22,12 +24,16 @@ export default function tiles(ctrl, g) {
 
 
   this.blocks = new Pool(id => new makeBlock(ctrl));
-  
 
   this.init = d => {
     this.data = {};
 
     this.hero.init();
+  };
+
+  this.move = dir => {
+    let dTheta = u.PI * 0.25 * dir;
+    this.blocks.each(_ => _.data.tTheta = _.data.theta + dTheta);
   };
 
   const maybeSpawnEdges = delta => {
@@ -42,34 +48,23 @@ export default function tiles(ctrl, g) {
     }
   };
 
+  const thetas = [
+    u.PI * 0.5,
+    u.PI * 0.75,
+    u.PI * 0.25,
+    u.PI * 1.0,
+    0,
+  ];
+
   const maybeSpawnBlock = u.withDelay(_ => {
+    const theta = thetas[u.randInt(0, thetas.length)];
+
     this.blocks.acquire(_ => _.init({
-      theta: u.rand(0, u.TAU)
+      theta,
+      tTheta: theta
     }));
+
   }, 1000);
-
-  const updateCollisions = delta => {
-
-    this.blocks.each(block => {
-      const { z , theta } = block.data;
-
-      this.hero.bullets.each(bullet => {
-        const { z: z2, theta: theta2 } = bullet.data;
-
-        if (Math.abs(z - z2) < 50) {
-          if (Math.abs(theta - theta2) < 0.02) {
-
-            this.hero.bullets.release(bullet);
-            this.blocks.release(block);
-            console.log("hit");
-
-          }
-        }
-
-      });
-    });
-
-  };
 
 
   this.update = delta => {
@@ -77,13 +72,10 @@ export default function tiles(ctrl, g) {
     maybeSpawnEdges(delta);
     maybeSpawnBlock(delta);
 
-    updateCollisions(delta);
-
     this.edges.each(_ => _.update(delta));
 
     this.blocks.each(_ => _.update(delta));
 
-    this.hero.update(delta);
   };
  
 }

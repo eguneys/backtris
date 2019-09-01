@@ -34,7 +34,7 @@ export default function hero(ctrl, g) {
     const { tick } = ctrl.data;
 
     this.data.theta += this.data.vTheta * delta * 0.01 * 0.3;
-    this.data.theta = this.data.theta % u.TAU;
+    this.data.theta = (this.data.theta + u.TAU) % u.TAU;
   };
 
   this.update = delta => {

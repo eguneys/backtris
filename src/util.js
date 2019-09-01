@@ -44,6 +44,10 @@ export function now() {
   return Date.now();
 }
 
+export function interpolate(a, b, dt = 0.04) {
+  return a + (b - a) * dt;
+}
+
 export const ensureDelay = (start, fn, delay = 1000) => {
   if (now() - start > delay) {
     fn();
