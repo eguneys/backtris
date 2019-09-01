@@ -35,7 +35,7 @@ export default function ctrl(state, g) {
     this.data.tick += delta;
 
     this.play.update(delta);
-
-    this.camera.update(delta);
+    
+    // this.camera.update(delta);
   };
 }

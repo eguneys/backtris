@@ -45,39 +45,19 @@ export default function view(ctrl, g) {
     }, { x: 0, y: 0, width, height });
   };
 
-  function renderBullet(ctrl, bullet) {
-
-    let project = bullet.data.project;
-
-    const fromP = camera.project([bullet.data.x,
-                                  bullet.data.y,
-                                  bullet.data.z - 5]),
-          toP = camera.project([bullet.data.x,
-                                bullet.data.y,
-                                bullet.data.z]);
-
-    g.draw(ctx => {
-      ctx.beginPath();
-      ctx.moveTo(fromP[0], fromP[1]);
-      ctx.lineTo(toP[0], toP[1]);
-      ctx.stroke();
-
-    }, { x: 0, y: 0, width, height });
-
-
-  }
-
   function renderHero(ctrl) {
     const tilesCtrl = ctrl.play.tiles;
     const heroCtrl = tilesCtrl.hero;
 
-    g.raw(ctx => {
-      ctx.strokeStyle = colB;
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-    });
+    let view = heroCtrl.project();
 
-    heroCtrl.bullets.each(_ => renderBullet(ctrl, _));
+    g.draw(ctx => {
+      ctx.fillStyle = 'red';
+      ctx.beginPath();
+      ctx.arc(view[0], view[1], 10, 0, u.TAU);
+      ctx.fill();
+      
+    });
 
   }
 
@@ -102,6 +82,26 @@ export default function view(ctrl, g) {
 
   }
 
+  function renderEdge(ctrl, edge) {
+
+    let { view, lines } = edge.geometry();
+
+    g.draw(ctx => {
+
+      lines.forEach(line => {
+
+        let v1 = view[line[0]],
+            v2 = view[line[1]];
+
+        ctx.moveTo(v1[0], v1[1]);
+        ctx.lineTo(v2[0], v2[1]);
+        //ctx.stroke();
+        ctx.stroke();
+      });
+      
+    });
+  }
+
   this.render = ctrl => {
 
     const tilesCtrl = ctrl.play.tiles;
@@ -112,7 +112,7 @@ export default function view(ctrl, g) {
         ctx.strokeStyle = colDot;
       });
 
-      tilesCtrl.edges.each(_ => renderDot(ctrl, _));
+      tilesCtrl.edges.each(_ => renderEdge(ctrl, _));
 
       tilesCtrl.blocks.each(_ => renderBlock(ctrl, _));
 

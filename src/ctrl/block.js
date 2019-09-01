@@ -8,18 +8,29 @@ export default function block(ctrl, g) {
 
   const { width, height, holeRadius } = ctrl.data.game;
 
+  let blockHeight = width * 0.01,
+      blockWidth = width * 0.04,
+      blockDepth = width * 0.008;
+
   const tilesCtrl = ctrl.play.tiles;
 
-  let geometry;
+  let geometry,
+      iTheta;
+  let lScale = 1.0;
   
   this.init = d => {
+
     this.data = { 
       tTheta: 0,
       theta: 0,
       z: camera.near,
       ...d };
 
-    geometry = cubeGeometry(width * 0.01, width * 0.04, width * 0.05);
+    iTheta = this.data.tTheta;
+
+    geometry = cubeGeometry(blockHeight,
+                            blockWidth,
+                            blockDepth);
 
   };
 
@@ -45,8 +56,13 @@ export default function block(ctrl, g) {
   };
 
   const updatePos = delta => {
+    const { tick } = ctrl.data;
     
-    this.data.theta = u.interpolate(this.data.theta, this.data.tTheta);
+    lScale = 1.0 - u.usin(tick * 0.005) * 0.2;
+
+    iTheta = u.interpolate(iTheta, this.data.tTheta);
+
+    this.data.theta = u.interpolate(this.data.theta, iTheta);
 
     this.data.z += delta * 0.1;
 
@@ -59,7 +75,17 @@ export default function block(ctrl, g) {
                                    this.data.y,
                                    this.data.z);
 
+    modelMatrix = mat4.translate(modelMatrix, 
+                                 blockWidth * 0.5,
+                                 blockHeight * 0.5, 0);
+
     modelMatrix = mat4.zRotate(modelMatrix, this.data.theta);
+
+    modelMatrix = mat4.scale(modelMatrix, lScale, 1, 1);
+
+    modelMatrix = mat4.translate(modelMatrix,
+                                 -blockWidth * 0.5,
+                                 -blockHeight * 0.5 * 0.0, 0);
   };
 
   const maybeKill = () => {
