@@ -5,7 +5,7 @@ export default function defaults(width, height) {
 
   const ratio = height / width;
 
-  const holeRadius = width * 0.03;
+  const tileWidth = width * 0.031;
 
   const game = {
     state: u.States.Over,
@@ -13,7 +13,7 @@ export default function defaults(width, height) {
     width,
     height,
     ratio,
-    holeRadius
+    tileWidth
   };
 
   return {

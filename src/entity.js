@@ -33,13 +33,8 @@ export default function makeEntity(ctrl, mesh, onDie, liveSecs) {
     mesh.updateModel(physics.values());
   };
 
-  const updatePhysics = delta => {
-    physics.update(delta);
-  };
-  
   this.update = delta => {
 
-    updatePhysics(delta);
     updateModel();
 
     life.update(delta);

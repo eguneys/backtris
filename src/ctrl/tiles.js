@@ -4,51 +4,40 @@ import Pool from '../pool';
 
 import * as u from '../util';
 
-import makeExplosion from './explosion';
+import makeMesh from '../mesh';
+import * as geo from '../geometry';
+import makeEntity from '../entity';
 
-import makeHero from './hero';
-
-export default function tiles(ctrl) {
-
+export default function makeTile(ctrl, tiles) {
   const { camera } = ctrl;
-  
   const { width, height } = ctrl.data.game;
-
-  this.explosion = new Pool(id => new makeExplosion(ctrl, this));
-
-  this.hero = new makeHero(ctrl);
-
+  
   this.init = d => {
-    this.data = {};
+    this.data = { 
+      size: 30,
+      ...d };
 
-    this.hero.init({});
+    const bWidth = this.data.size;
+
+    let geometry = geo.cubeGeometry(bWidth);
+    this.mesh = new makeMesh(camera, geometry, {
+      width: bWidth,
+      height: bWidth
+    });
   };
 
-  this.move = dir => {
-    this.hero.move(dir);
-  };
-
-  this.stop = dir => {
-    this.hero.stop(dir);
-  };
-
-  this.explode = (x, y, z) => {
-    this.explosion.acquire(_ => _.init({
-      x, y, z
-    }));
+  const updateModel = delta => {
+    this.mesh.updateModel({
+      x: this.data.x,
+      y: this.data.y,
+      z: 0
+    });
   };
 
 
   this.update = delta => {
-
-    if (Math.random() < 0.3) 
-    this.explode(u.rand(-width*0.5, width*0.5),
-                 u.rand(-height*0.5, height*0.5),
-                 0);
-
-    this.explosion.each(_ => _.update(delta));
-
-    this.hero.update(delta);
+    updateModel(delta);
   };
- 
+  
+
 }

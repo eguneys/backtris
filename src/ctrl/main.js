@@ -1,10 +1,10 @@
-import * as u from './util';
+import * as u from '../util';
 
-import Pool from './pool';
+import Pool from '../pool';
 
-import makeCamera from './camera';
+import makeCamera from '../camera';
 
-import makePlay from './ctrl/play';
+import makePlay from './play';
 
 export default function ctrl(state, g) {
   const defaults = () => ({
@@ -20,27 +20,29 @@ export default function ctrl(state, g) {
 
   this.play.init(this);
 
+  let hero = this.play.hero;
+
   this.pressKey = key => {
     if (key === 'up') {
-      this.play.tiles.move([0, -1]);
+      hero.move([0, -1]);
     } else if (key === 'down') {
-      this.play.tiles.move([0, 1]);
+      hero.move([0, 1]);
     } else if (key === 'left') {
-      this.play.tiles.move([-1, 0]);
+      hero.move([-1, 0]);
     } else if (key === 'right') {
-      this.play.tiles.move([1, 0]);
+      hero.move([1, 0]);
     }
   };
 
   this.releaseKey = key => {
     if (key === 'up') {
-      this.play.tiles.stop([0, -1]);
+      hero.stop([0, -1]);
     } else if (key === 'down') {
-      this.play.tiles.stop([0, 1]);
+      hero.stop([0, 1]);
     } else if (key === 'left') {
-      this.play.tiles.stop([-1, 0]);
+      hero.stop([-1, 0]);
     } else if (key === 'right') {
-      this.play.tiles.stop([1, 0]);
+      hero.stop([1, 0]);
     }    
   };
 

@@ -24,6 +24,10 @@ export function memoize2(fn) {
   };
 }
 
+export function objForeach(obj, f) {
+  Object.keys(obj).forEach(key => f(key, obj[key]));
+};
+
 export function objMap(obj, f) {
   return Object.keys(obj).reduce((acc, _) => ({
     [_]: f(_, obj[_]),

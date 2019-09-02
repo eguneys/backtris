@@ -58,29 +58,49 @@ export default function physics(opts) {
     vTh = vec3(x, y, z);
   };
 
-  this.values = () => {
+  this.values = (_pos = pos, _theta = theta) => {
 
     return {
-      x: pos[0],
-      y: pos[1],
-      z: pos[2],
-      theta: [theta[0],
-              theta[1],
-              theta[2]]
+      x: _pos[0],
+      y: _pos[1],
+      z: _pos[2],
+      theta: [_theta[0],
+              _theta[1],
+              _theta[2]]
     };
   };
 
-  this.update = delta => {
+  this.calculateUpdate = (delta, collisions = {}) => {
     const dt = delta * 0.01;
 
-    theta = v.addScale(theta, vTh, dt);
+    let newTheta = v.addScale(theta, vTh, dt);
 
-    vel = v.addScale(vel, acc, dt);
+    let newVel = v.addScale(vel, acc, dt);
+    newVel = v.addScale(newVel, gravity, dt);
 
-    vel = v.addScale(vel, gravity, dt);
+    if ((collisions.top && newVel[1] < 0) ||
+        (collisions.bottom && newVel[1] > 0)) {
+      newVel[1] = 0;
+    }
+    if ((collisions.left && newVel[0] < 0) ||
+        (collisions.right && newVel[0] > 0)) {
+      console.log(collisions.left);
+      newVel[0] = 0;
+    }
 
-    pos = v.addScale(pos, vel, dt);
+    let newPos = v.addScale(pos, newVel, dt);
 
+    return {
+      theta: newTheta,
+      vel: newVel,
+      pos: newPos
+    };
+  };
+
+  this.applyUpdate = update => {
+    theta = update.theta;
+    vel = update.vel;
+    pos = update.pos;
   };
 
 }

@@ -1,5 +1,3 @@
-import { Moves } from './ctrl';
-
 export function bindDocument(ctrl, g) {
   const unbinds = [];
 

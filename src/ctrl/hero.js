@@ -17,11 +17,13 @@ export default function hero(ctrl) {
 
   this.bullets = new Pool(id => new makeBullet(ctrl, this));
 
-  let bWidth = 20;
-  let geometry = geo.cubeGeometry(bWidth);
+  let heroWidth = 20,
+      heroHeight = heroWidth;
+
+  let geometry = geo.cubeGeometry(heroWidth);
   this.mesh = new makeMesh(camera, geometry, {
-    width: bWidth,
-    height: bWidth
+    width: heroWidth,
+    height: heroHeight
   });
 
   this.entity = new makeEntity
@@ -31,7 +33,6 @@ export default function hero(ctrl) {
 
   let phy = this.entity.physics;
   let lif = this.entity.life;
-
 
   let moveDir = [0, 0];
 
@@ -77,6 +78,36 @@ export default function hero(ctrl) {
       vDispense: vec3(0, -5, -5)
     }));
   }, 100);
+
+  const dimensions = pos => {
+    return {
+      left: pos.x,
+      top: pos.y,
+      right: pos.x + heroWidth,
+      bottom: pos.y + heroHeight
+    };
+  };
+
+  this.dimensions = delta => {
+    const pos = phy.values(),
+          posAfter = this.calculatePhysics(delta);
+
+    return {
+      before: dimensions(pos),
+      after: dimensions(posAfter)
+    };
+  };
+
+  this.calculatePhysics = delta => {
+    let { pos, theta } = phy.calculateUpdate(delta);
+    return phy.values(pos, theta);
+  };
+
+  this.applyPhysics = (delta, collisions) => {
+    let update = phy.calculateUpdate(delta, collisions);
+
+    phy.applyUpdate(update);
+  };
 
   this.update = delta => {
 

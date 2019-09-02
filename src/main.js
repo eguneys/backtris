@@ -4,7 +4,7 @@ import Assets from './assets';
 
 import Graphics from './graphics';
 import makeView from './view/main';
-import makeCtrl from './ctrl';
+import makeCtrl from './ctrl/main';
 import Loop from 'loopz';
 
 import * as events from './events';
@@ -25,8 +25,7 @@ export function app(element, options) {
     .then(assets => {
 
       const state = {
-        ...defaults(displayWidth, displayHeight),
-        bounds: canvas.getBoundingClientRect()
+        ...defaults(displayWidth, displayHeight)
       };
 
       let graphics = new Graphics(state, ctx);
@@ -45,7 +44,7 @@ export function app(element, options) {
 
 
       if (module.hot) {
-        module.hot.accept('./ctrl', function() {
+        module.hot.accept('./ctrl/main', function() {
           try {
             ctrl = new makeCtrl(state, graphics);
           } catch (e) {

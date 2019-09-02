@@ -22,13 +22,9 @@ export default function view(ctrl, g, assets) {
       ctx.fillRect(0, 0, width, height);
     }, { x: 0, y: 0, width, height });
 
-    let views = {};
-
-    //views.play = play.render(ctrl, g);
+    play.render(ctrl, g);
     
-    effects.render(ctrl, g);
-
-    return views;
+    // effects.render(ctrl, g);
   };
 
 }
