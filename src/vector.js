@@ -14,6 +14,10 @@ export function scale(v1, s) {
           v1[2] * s];
 };
 
+export function inverse(v) {
+  return scale(v, -1);
+};
+
 export function addScale(v1, v2, s) {
   return add(v1, scale(v2, s));
 }

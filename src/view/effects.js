@@ -15,8 +15,8 @@ export default function view(ctrl, g) {
     translate: [width*0.0, height * 0.0]
   });
 
-
-  const colB = new co.shifter(co.Palette.FluRed).css();
+  const colRed = new co.shifter(co.Palette.FluRed);
+  const colBullet = new co.shifter(co.Palette.LuckyP);
   
   function renderMesh(ctrl, mesh) {
 
@@ -39,12 +39,32 @@ export default function view(ctrl, g) {
   }
 
   function renderExplosion(ctrl, explosion) {
-    explosion.particles.each(_ => renderMesh(ctrl, _.mesh));
+    explosion.particles.each(_ => {
+      g.raw(ctx => {
+        let alpha = _.life.alpha();
+        colRed
+          .reset()
+          .lum(alpha);
+        ctx.strokeStyle = colRed.css();
+      });
+
+      renderMesh(ctrl, _.mesh);
+    });
   }
 
 
   function renderHero(ctrl, hero) {
-    renderMesh(ctrl, hero.bullets.mesh);
+
+    g.stroke(colRed);
+    renderMesh(ctrl, hero.mesh);
+
+    g.raw(ctx => {
+      ctx.strokeStyle = colBullet.css();
+    });
+
+    hero.bullets.each(_ => {
+      renderMesh(ctrl, _.mesh);
+    });
   }
 
   this.render = ctrl => {
@@ -53,7 +73,9 @@ export default function view(ctrl, g) {
 
     g.draw(ctx => {
 
-      renderExplosion(ctrl, tilesCtrl.explosion);
+      ctx.strokeStyle = colRed;
+
+      tilesCtrl.explosion.each(_ => renderExplosion(ctrl, _));
 
       renderHero(ctrl, tilesCtrl.hero);
 

@@ -8,7 +8,7 @@ import * as u from './util';
 import Pool from './pool';
 
 
-export default function makeEntity(ctrl, mesh, onDie) {
+export default function makeEntity(ctrl, mesh, onDie, liveSecs) {
 
   const { camera } = ctrl;
   const { width, height } = ctrl.data.game;
@@ -18,11 +18,12 @@ export default function makeEntity(ctrl, mesh, onDie) {
     height: mesh.height
   });
 
-  let life = new makeLife(() => {
-    // hero.bullets.release(this);
+  let life = new makeLife(onDie, {
+    life: liveSecs
   });
 
   this.physics = physics;
+  this.life = life;
 
   this.init = d => {
     this.data = { ...d };

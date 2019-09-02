@@ -15,6 +15,8 @@ export default function Camera(ctrl) {
   let tX = pCX,
       tY = pCY;
 
+  this.width = width;
+  this.height = height;
   this.far = -width*0.5;
   this.near = -width*0.78;
 

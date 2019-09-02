@@ -34,6 +34,10 @@ export default function graphics(state, screenCtx) {
     }
   };
 
+  this.stroke = col => this.raw(ctx => {
+    ctx.strokeStyle = col;
+  });
+
   this.path = ({ path, x, y, width, height, transform }, color) =>
   this.draw(ctx => {
     ctx.fillStyle = color;

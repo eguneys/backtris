@@ -9,7 +9,9 @@ export const Palette = {
   SummerSky: 0xff34ace0,
   Pumpkin: 0xffff793f,
   CelGreen: 0xff33d9b2,
-  FluRed: 0xffff5252
+  FluRed: 0xffff5252,
+  Mandarin: 0xffffb142,
+  LuckyP: 0xff2c2c54
 };
 
 export const arr = rgba => {
@@ -44,6 +46,12 @@ export const css = rgba => {
   return `rgba(${r}, ${g}, ${b}, ${a/255})`;
 };
 
+// hsla(120, 100%, 50%, 0.3)
+export function cssHsla(h,s,l,a) {
+  return `hsla(${h * 360}, ${s * 100}%, ${l*100}%, ${a/255})`;
+
+}
+
 export function shifter(rgba) {
   let [h, s, l, a] = hsla(rgba);
 
@@ -74,5 +82,6 @@ export function shifter(rgba) {
   this.alp = fluent(dv => a = shift(a/255, dv) * 255);
 
   this.rgba = () => hslToRgba(h, s, l, a);
-  this.css = () => css(this.rgba());
+  //this.css = () => css(this.rgba());
+  this.css = () => cssHsla(h, s, l, a);
 }

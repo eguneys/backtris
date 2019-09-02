@@ -21,14 +21,28 @@ export default function ctrl(state, g) {
   this.play.init(this);
 
   this.pressKey = key => {
-    if (key === 'left') {
-      this.play.tiles.move(1);
+    if (key === 'up') {
+      this.play.tiles.move([0, -1]);
+    } else if (key === 'down') {
+      this.play.tiles.move([0, 1]);
+    } else if (key === 'left') {
+      this.play.tiles.move([-1, 0]);
     } else if (key === 'right') {
-      this.play.tiles.move(-1);
+      this.play.tiles.move([1, 0]);
     }
   };
 
-  this.releaseKey = _ => {};
+  this.releaseKey = key => {
+    if (key === 'up') {
+      this.play.tiles.stop([0, -1]);
+    } else if (key === 'down') {
+      this.play.tiles.stop([0, 1]);
+    } else if (key === 'left') {
+      this.play.tiles.stop([-1, 0]);
+    } else if (key === 'right') {
+      this.play.tiles.stop([1, 0]);
+    }    
+  };
 
 
   this.update = delta => {
