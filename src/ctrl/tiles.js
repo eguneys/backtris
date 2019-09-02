@@ -21,7 +21,16 @@ export default function makeTile(ctrl, tiles) {
 
     const bWidth = this.data.size;
 
-    let geometry = geo.cubeGeometry(bWidth);
+    let geometry;
+
+    switch (this.data.role) {
+    case 'wall': 
+      geometry = geo.cubeGeometry(bWidth);
+      break;
+    case 'space':
+      geometry = geo.planeGeometry(bWidth);
+      break;
+    }
     this.mesh = new makeMesh(camera, geometry, {
       width: bWidth,
       height: bWidth
@@ -30,8 +39,20 @@ export default function makeTile(ctrl, tiles) {
 
   const stepColor = new co.shifter(co.Palette.LuckyP);
 
+  let heroStepAlpha = 0.1,
+      tHeroStepAlpha = 0.1;
+
   this.heroStep = () => {
-    this.mesh.paint('top', stepColor.css());
+    heroStepAlpha = 0.6;
+  };
+
+  const updateColors = delta => {
+    heroStepAlpha = u.interpolate(heroStepAlpha, tHeroStepAlpha, 0.1);
+
+    this.mesh.paint('top', stepColor
+                    .reset()
+                    .lum(heroStepAlpha)
+                    .css());    
   };
 
   const updateModel = delta => {
@@ -45,6 +66,7 @@ export default function makeTile(ctrl, tiles) {
 
   this.update = delta => {
     updateModel(delta);
+    updateColors(delta);
   };
   
 

@@ -43,14 +43,14 @@ export default function ctrl(ctrl, g) {
     objForeach(this.data.tiles, (key, tile) => {
       const pos = levels.key2pos(key);
 
-      this.tiles.acquire(_ => _.init({
+      tile.ctrl = this.tiles.acquire(_ => _.init({
         ...tilePos2WorldPos(pos),
         ...tile
       }));
     });
   };
 
-  const collisions = (dims) => {
+  const collisionKeys = (dims) => {
     let collTiles = { 'lefttop': [dims.left, dims.top],
                      'leftbottom': [dims.left, dims.bottom],
                      'righttop': [dims.right, dims.top],
@@ -63,7 +63,7 @@ export default function ctrl(ctrl, g) {
     );
   };
 
-  const collisionForPhysics = (collisions) => {
+  const collisionsFromKeys = (collisions) => {
     let collTiles = objMap(collisions, (_, key) => {
       let tile = this.data.tiles[key];
 
@@ -73,19 +73,30 @@ export default function ctrl(ctrl, g) {
     return {
       left: collTiles['lefttop'] && collTiles['leftbottom'],
       top: collTiles['lefttop'] && collTiles['righttop'],
-      right: collTiles['lefttop'] && collTiles['rightbottom'],
+      right: collTiles['righttop'] && collTiles['rightbottom'],
       bottom: collTiles['rightbottom'] && collTiles['leftbottom']
     };
+  };
+
+  const updateTileFaces = (collisionKeys, collisions) => {
+    if (collisions.bottom) {
+      [collisionKeys['rightbottom'],
+       collisionKeys['leftbottom']]
+        .map(_ => this.data.tiles[_].ctrl)
+        .forEach(_ => _.heroStep());
+    }
   };
 
   const updateHeroCollisions = delta => {
     const { before, after } = this.hero.dimensions(delta);
 
-    const afterCollisions = collisions(after);
+    const afterCollisionKeys = collisionKeys(after);
 
-    let colForPhy = collisionForPhysics(afterCollisions);
+    let afterCollisions = collisionsFromKeys(afterCollisionKeys);
 
-    this.hero.applyPhysics(delta, colForPhy);
+    updateTileFaces(afterCollisionKeys, afterCollisions);
+
+    this.hero.applyPhysics(delta, afterCollisions);
 
     
   };

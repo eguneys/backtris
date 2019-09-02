@@ -14,13 +14,7 @@ export default function view(ctrl, g, assets) {
   const { width, height, tilesWidth } = ctrl.data.game;
 
   function renderTile(ctrl, tile) {
-    const { role } = tile.data;
-
-    switch (role) {
-    case 'wall':
-      renderMesh(ctrl, g, tile.mesh);
-      break;
-    }
+    renderMesh(ctrl, g, tile.mesh);
   }
 
   function renderHero(ctrl, hero) {
@@ -64,7 +58,7 @@ function renderMesh(ctrl, g, mesh) {
       ctx.fill();
     });
 
-    ctx.strokeStyle = 'black';
+    ctx.strokeStyle = material['stroke'] || `rgba(0, 0, 0, 0)`;
     lines.forEach(line => {
       ctx.beginPath();
       let v1 = view[line[0]],

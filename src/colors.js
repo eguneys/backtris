@@ -7,6 +7,7 @@ export const Palette = {
   SwanWhite: 0xfff7f1e3,
   CrocTooth: 0xffd1ccc0,
   SummerSky: 0xff34ace0,
+  GreyPorc: 0xff84817a,
   Pumpkin: 0xffff793f,
   CelGreen: 0xff33d9b2,
   FluRed: 0xffff5252,

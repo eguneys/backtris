@@ -2,6 +2,8 @@ import makeMesh from '../mesh';
 import * as geo from '../geometry';
 import makeEntity from '../entity';
 
+import * as co from '../colors';
+
 import * as u from '../util';
 
 import Pool from '../pool';
@@ -15,12 +17,11 @@ export default function hero(ctrl) {
   const { camera } = ctrl;
   const { width, height } = ctrl.data.game;
 
-  this.bullets = new Pool(id => new makeBullet(ctrl, this));
-
   let heroWidth = 20,
       heroHeight = heroWidth;
 
-  let geometry = geo.cubeGeometry(heroWidth);
+  //let geometry = geo.cubeGeometry(heroWidth);
+  let geometry = geo.ringGeometry(heroWidth);
   this.mesh = new makeMesh(camera, geometry, {
     width: heroWidth,
     height: heroHeight
@@ -34,11 +35,16 @@ export default function hero(ctrl) {
   let phy = this.entity.physics;
   let lif = this.entity.life;
 
+  this.bullets = new Pool(id => new makeBullet(ctrl, this));
+
+  const heroColor = new co.shifter(co.Palette.GreyPorc);
+
   let moveDir = [0, 0];
 
   this.init = d => {
     this.data = { ...d };
   };
+
 
   this.move = dir => {
     if (dir[0] !== 0) {
@@ -60,6 +66,10 @@ export default function hero(ctrl) {
 
   const updateMovement = delta => {
     phy.move(moveDir);
+  };
+
+  const updatePaint = delta => {
+    this.mesh.paint('front', heroColor.css());
   };
 
   const maybeSpawnBullet = u.withDelay(_ => {
@@ -112,6 +122,8 @@ export default function hero(ctrl) {
   this.update = delta => {
 
     this.entity.update(delta);
+
+    updatePaint(delta);
 
     updateMovement(delta);
 

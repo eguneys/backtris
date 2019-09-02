@@ -84,7 +84,6 @@ export default function physics(opts) {
     }
     if ((collisions.left && newVel[0] < 0) ||
         (collisions.right && newVel[0] > 0)) {
-      console.log(collisions.left);
       newVel[0] = 0;
     }
 

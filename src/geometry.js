@@ -2,18 +2,55 @@ import * as u from './util';
 
 export function ringGeometry(radius, end = u.TAU, edges = 10) {
   const vertices = [],
-        lines = [];
+        lines = [],
+        faces = [];
 
-  let lineI = 0;
+  let frontFace = [];
+  let lineI = 0,
+      faceI = 0;
   for (let a = 0; a < end; a+= u.PI / edges) {
     let c = Math.cos(a) * radius,
         s = Math.sin(a) * radius;
     vertices.push([c, s, 0]);
+    frontFace.push(faceI++);
+
     if (lineI++ % 2 === 0) {
       lines.push([lineI, lineI - 1]);
     }
   }
-  return { vertices, lines };
+
+  faces.push([...frontFace, 0]);
+
+  let faceIndexes = {
+    front: 0
+  };
+
+  return { vertices, lines, faces, faceIndexes };
+}
+
+export function planeGeometry(width, height = width) {
+  const vertices = [],
+        lines = [],
+        faces = [];
+
+  vertices.push([0, 0, 0]);
+  vertices.push([0, height, 0]);
+  vertices.push([width, height, 0]);
+  vertices.push([width, 0, 0]);
+
+  lines.push([0, 1]);
+  lines.push([1, 2]);
+  lines.push([2, 3]);
+  lines.push([3, 0]);
+
+  //front
+  faces.push([0, 1, 2, 3, 0]);
+
+  let faceIndexes = {
+    front: 0,
+  };
+
+  return { vertices, lines, faces, faceIndexes };  
 }
 
 export function cubeGeometry(width, height = width, depth = width) {
