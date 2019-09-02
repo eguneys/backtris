@@ -2,6 +2,8 @@ import { objFilter } from '../util2';
 
 import Pool from '../pool';
 
+import * as co from '../colors';
+
 import * as u from '../util';
 
 import makeMesh from '../mesh';
@@ -24,6 +26,12 @@ export default function makeTile(ctrl, tiles) {
       width: bWidth,
       height: bWidth
     });
+  };
+
+  const stepColor = new co.shifter(co.Palette.LuckyP);
+
+  this.heroStep = () => {
+    this.mesh.paint('top', stepColor.css());
   };
 
   const updateModel = delta => {

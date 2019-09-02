@@ -57,11 +57,15 @@ export default function ctrl(ctrl, g) {
                      'rightbottom': [dims.right, dims.bottom]
                    };
 
-    collTiles = objMap(collTiles, (_, pos) => {
-      const key = levels.pos2key(
-        worldPos2TilePos({ x: pos[0], y: pos[1] }));
+    return objMap(collTiles, (_, pos) => 
+      levels.pos2key(
+        worldPos2TilePos({ x: pos[0], y: pos[1] }))
+    );
+  };
 
-      const tile = this.data.tiles[key];
+  const collisionForPhysics = (collisions) => {
+    let collTiles = objMap(collisions, (_, key) => {
+      let tile = this.data.tiles[key];
 
       return tile.role === 'wall';
     });
@@ -74,18 +78,22 @@ export default function ctrl(ctrl, g) {
     };
   };
 
-  const updateHeroPhysics = delta => {
+  const updateHeroCollisions = delta => {
     const { before, after } = this.hero.dimensions(delta);
 
     const afterCollisions = collisions(after);
 
-    this.hero.applyPhysics(delta, afterCollisions);
+    let colForPhy = collisionForPhysics(afterCollisions);
+
+    this.hero.applyPhysics(delta, colForPhy);
+
+    
   };
 
   this.update = delta => {
     this.tiles.each(_ => _.update(delta));
 
-    updateHeroPhysics(delta);
+    updateHeroCollisions(delta);
 
     this.hero.update(delta);
   };

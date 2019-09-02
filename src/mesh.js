@@ -19,9 +19,17 @@ export default function mesh(camera, geometry, dims) {
 
   let modelMatrix = mat4.identity();
 
+  let material = {};
+
+  this.material = () => material;
+
+  this.paint = (face, color) => {
+    material[face] = color;
+  };
+
   this.geometry = () => {
 
-    let { vertices, lines } = geometry;
+    let { vertices, lines, faces, faceIndexes } = geometry;
 
     let model = vertices.map(vertex => {
       return mat4.multiplyVec(modelMatrix, [...vertex, 1.0]);
@@ -34,7 +42,9 @@ export default function mesh(camera, geometry, dims) {
 
     return {
       view,
-      lines
+      lines,
+      faces,
+      faceIndexes
     };
   };
 

@@ -1,3 +1,5 @@
+import { objForeach } from '../util2';
+
 import * as G from '../graphics';
 
 import * as co from '../colors';
@@ -40,16 +42,34 @@ export default function view(ctrl, g, assets) {
 
 function renderMesh(ctrl, g, mesh) {
 
-  let { view, lines } = mesh.geometry();
+  let material = mesh.material();
+  let { view, lines, faces, faceIndexes } = mesh.geometry();
 
   g.draw(ctx => {
 
-    lines.forEach(line => {
+    objForeach(faceIndexes, (faceKey, faceIndex) => {
+      ctx.fillStyle = material[faceKey] || `rgba(0, 0, 0, 0)`;
 
+      let face = faces[faceIndex];
+
+      ctx.beginPath();
+      let v1 = view[face[0]];
+      ctx.moveTo(v1[0], v1[1]);
+
+      face
+        .slice(1, face.length)
+        .map(_ => view[_]).forEach(v => {
+          ctx.lineTo(v[0], v[1]);
+      });
+      ctx.fill();
+    });
+
+    ctx.strokeStyle = 'black';
+    lines.forEach(line => {
+      ctx.beginPath();
       let v1 = view[line[0]],
           v2 = view[line[1]];
 
-      ctx.beginPath();
       ctx.moveTo(v1[0], v1[1]);
       ctx.lineTo(v2[0], v2[1]);
       ctx.stroke();
