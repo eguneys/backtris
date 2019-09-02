@@ -26,7 +26,7 @@ export default function physics(opts) {
     let x = dir[0],
         y = dir[1],
         xAcc = x * 2,
-        xV = x * 60;
+        xV = x * 30;
 
     this.acc({ x: xAcc });
     this.vel({ x: xV });

@@ -13,6 +13,9 @@ import makeEntity from '../entity';
 export default function makeTile(ctrl, tiles) {
   const { camera } = ctrl;
   const { width, height } = ctrl.data.game;
+
+
+  let colorFace;
   
   this.init = d => {
     this.data = { 
@@ -24,12 +27,23 @@ export default function makeTile(ctrl, tiles) {
     let geometry;
 
     switch (this.data.role) {
-    case 'wall': 
+    case 'leftwall': 
+      colorFace = 'right';
+      geometry = geo.cubeGeometry(bWidth);
+      break;
+    case 'rightwall': 
+      colorFace = 'left';
+      geometry = geo.cubeGeometry(bWidth);
+      break;
+    case 'topwall':
+      colorFace = 'top';
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'space':
       geometry = geo.planeGeometry(bWidth);
       break;
+    default:
+      throw new Error("Bad tile role " + this.data.role);
     }
     this.mesh = new makeMesh(camera, geometry, {
       width: bWidth,
@@ -39,19 +53,29 @@ export default function makeTile(ctrl, tiles) {
 
   const stepColor = new co.shifter(co.Palette.LuckyP);
 
-  let heroStepAlpha = 0.1,
-      tHeroStepAlpha = 0.1;
+  let heroStepAlpha = new u.interpolator(0.1),
+      heroStepAlpha2 = new u.interpolator(0.1);
 
-  this.heroStep = () => {
-    heroStepAlpha = 0.6;
+  this.heroStep = (face) => {
+    if (face === 'bottom') {
+      heroStepAlpha2.set(0.9);
+    } else {
+      heroStepAlpha.set(0.6);
+    }
   };
 
   const updateColors = delta => {
-    heroStepAlpha = u.interpolate(heroStepAlpha, tHeroStepAlpha, 0.1);
+    heroStepAlpha.interpolate();
+    heroStepAlpha2.interpolate();
 
-    this.mesh.paint('top', stepColor
+    this.mesh.paint('bottom', stepColor
                     .reset()
-                    .lum(heroStepAlpha)
+                    .alp(heroStepAlpha2.get())
+                    .css());
+
+    this.mesh.paint(colorFace, stepColor
+                    .reset()
+                    .lum(heroStepAlpha.get())
                     .css());    
   };
 

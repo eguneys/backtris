@@ -27,8 +27,10 @@ export default function ctrl(ctrl, g) {
 
   const worldPos2TilePos = pos => {
     return [
-      Math.floor((pos.y + height * 0.44) / tileWidth),
-      Math.floor((pos.x + width * 0.45) / tileWidth)
+      u.clamp(0, levels.rows - 1, 
+              Math.floor((pos.y + height * 0.44) / tileWidth)),
+      u.clamp(0, levels.cols - 1, 
+              Math.floor((pos.x + width * 0.45) / tileWidth))
     ];
   };
 
@@ -45,7 +47,7 @@ export default function ctrl(ctrl, g) {
 
       tile.ctrl = this.tiles.acquire(_ => _.init({
         ...tilePos2WorldPos(pos),
-        ...tile
+        ...tile.role
       }));
     });
   };
@@ -67,7 +69,7 @@ export default function ctrl(ctrl, g) {
     let collTiles = objMap(collisions, (_, key) => {
       let tile = this.data.tiles[key];
 
-      return tile.role === 'wall';
+      return tile.role.block;
     });
 
     return {
@@ -84,6 +86,12 @@ export default function ctrl(ctrl, g) {
        collisionKeys['leftbottom']]
         .map(_ => this.data.tiles[_].ctrl)
         .forEach(_ => _.heroStep());
+    } 
+    if (collisions.top) {
+      [collisionKeys['righttop'],
+       collisionKeys['lefttop']]
+        .map(_ => this.data.tiles[_].ctrl)
+        .forEach(_ => _.heroStep('bottom'));      
     }
   };
 

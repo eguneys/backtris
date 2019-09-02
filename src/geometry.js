@@ -90,16 +90,19 @@ export function cubeGeometry(width, height = width, depth = width) {
   //left
   faces.push([0, 4, 5, 1, 0]);
   //right
-  faces.push([0, 4, 5, 1, 0]);
+  faces.push([3, 7, 6, 2, 3]);
   //top
   faces.push([0, 4, 7, 3, 0]);
+  // bottom
+  faces.push([1, 5, 6, 2, 1]);
 
   let faceIndexes = {
     front: 0,
     back: 1,
     left: 2,
     right: 3,
-    top: 4
+    top: 4,
+    bottom: 5
   };
 
   return { vertices, lines, faces, faceIndexes };

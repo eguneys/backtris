@@ -21,7 +21,7 @@ export default function hero(ctrl) {
       heroHeight = heroWidth;
 
   //let geometry = geo.cubeGeometry(heroWidth);
-  let geometry = geo.ringGeometry(heroWidth);
+  let geometry = geo.ringGeometry(heroWidth, u.TAU, 4);
   this.mesh = new makeMesh(camera, geometry, {
     width: heroWidth,
     height: heroHeight

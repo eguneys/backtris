@@ -19,34 +19,63 @@ export function key2pos(key) {
   return key.split('.').map(_ => parseInt(_));
 }
 
-const roles = { ' ': 'space', '.': 'wall' };
+const RoleCode = { ' ': 'space',
+                   '{': 'leftwall',
+                   '}': 'rightwall',
+                   '_': 'topwall' };
+
+const Role = {
+  space: {
+    
+  },
+  leftwall: {
+    facing: 'right',
+    block: true
+  },
+  rightwall: {
+    facing: 'left',
+    block: true
+  },
+  topwall: {
+    facing: 'top',
+    block: true
+  }
+};
 
 const levels = [
   `
-..............................
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.                            .
-.           ....    ....     .
-.                            .
-.   ...                      .
-.      .........      ........
-.                            .
-.            .               .
-..............................
+ ____________________________
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{                            }
+{      ___                   }
+{          ____              }
+{                            }
+{  ___                       }
+{     _____      ____        }
+{            _               }
+{____________________________}
 `
 ];
 
+const makeRole = (function roleMaker() {
+  let id = 1;
+  return function(roleCode) {
+    id++;
 
+    const role = RoleCode[roleCode];
+    return { key: id, role, ...Role[role] };
+  };
+})();
 
 export const read = levelStr => {
 
@@ -70,7 +99,7 @@ export const read = levelStr => {
     line.forEach((tileChar, col) => {
       let pos = [row, col];
       res[pos2key(pos)] = {
-        role: roles[tileChar]
+        role: makeRole(tileChar)
       };
     });
   });
