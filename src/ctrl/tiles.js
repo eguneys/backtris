@@ -15,8 +15,16 @@ export default function makeTile(ctrl, tiles) {
   const { width, height } = ctrl.data.game;
 
 
-  let colorFace;
-  
+  const frontColor = new co.shifter(co.Palette.SwanWhite);
+
+  const stepColor = new co.shifter(co.Palette.LuckyP);
+
+  let heroStepAlpha = new u.interpolator(0.1),
+      heroStepAlpha2 = new u.interpolator(0.1);
+
+  let frontAlpha,
+      colorFace;
+
   this.init = d => {
     this.data = { 
       size: 30,
@@ -29,17 +37,24 @@ export default function makeTile(ctrl, tiles) {
     switch (this.data.role) {
     case 'leftwall': 
       colorFace = 'right';
+      frontAlpha = new u.interpolator(0.5);
+
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'rightwall': 
       colorFace = 'left';
+      frontAlpha = new u.interpolator(0.5);
+
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'topwall':
       colorFace = 'top';
+      frontAlpha = new u.interpolator(0.5);
+
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'space':
+      frontAlpha = new u.interpolator(0.1);
       geometry = geo.planeGeometry(bWidth);
       break;
     default:
@@ -50,11 +65,6 @@ export default function makeTile(ctrl, tiles) {
       height: bWidth
     });
   };
-
-  const stepColor = new co.shifter(co.Palette.LuckyP);
-
-  let heroStepAlpha = new u.interpolator(0.1),
-      heroStepAlpha2 = new u.interpolator(0.1);
 
   this.heroStep = (face) => {
     if (face === 'bottom') {
@@ -76,7 +86,12 @@ export default function makeTile(ctrl, tiles) {
     this.mesh.paint(colorFace, stepColor
                     .reset()
                     .lum(heroStepAlpha.get())
-                    .css());    
+                    .css());
+
+    this.mesh.paint('front', frontColor
+                    .reset()
+                    .alp(frontAlpha.get())
+                    .css());
   };
 
   const updateModel = delta => {
