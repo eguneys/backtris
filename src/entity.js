@@ -7,15 +7,19 @@ import * as u from './util';
 
 import Pool from './pool';
 
+import * as v from './vector';
 
-export default function makeEntity(ctrl, mesh, onDie, liveSecs) {
+const { vec3 } = v;
+
+export default function makeEntity(ctrl, mesh, onDie, liveSecs, gravity = vec3(0.0, 10, 0.0)) {
 
   const { camera } = ctrl;
   const { width, height } = ctrl.data.game;
   
   const physics = new makePhysics({
     width: mesh.width,
-    height: mesh.height
+    height: mesh.height,
+    gravity
   });
 
   let life = new makeLife(onDie, {

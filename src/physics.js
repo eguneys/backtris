@@ -3,18 +3,16 @@ import * as v from './vector';
 const { vec3 } = v;
 
 export default function physics(opts) {
-
-
-  let gravity = vec3(0, 10, 0);
   
    opts = { pos: vec3(0),
             vel: vec3(0),
             acc: vec3(0),
             theta: vec3(0),
             vTh: vec3(0),
+            gravity: vec3(0, 10, 0),
             ...opts };
 
-  let { pos, vel, acc, theta, vTh } = opts;
+  let { pos, vel, acc, theta, vTh, gravity } = opts;
 
   this.jump = (xHeight, yHeight, zHeight) => {
     let s = vec3(xHeight, yHeight, zHeight);
@@ -100,6 +98,10 @@ export default function physics(opts) {
     theta = update.theta;
     vel = update.vel;
     pos = update.pos;
+  };
+
+  this.update = delta => {
+    this.applyUpdate(this.calculateUpdate(delta));
   };
 
 }

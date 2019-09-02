@@ -46,6 +46,10 @@ export default function hero(ctrl) {
   };
 
 
+  this.facing = () => {
+    return moveDir[0];
+  };
+
   this.move = dir => {
     if (dir[0] !== 0) {
       moveDir[0] = dir[0];
@@ -73,6 +77,10 @@ export default function hero(ctrl) {
   };
 
   const maybeSpawnBullet = u.withDelay(_ => {
+
+    if (moveDir[0] === 0) {
+      return;
+    }
 
     let { x, y } = phy.values();
 
@@ -140,22 +148,25 @@ function makeBullet(ctrl, hero) {
   const { camera } = ctrl;
   const { width, height } = ctrl.data.game;
 
-  let bWidth = 10;
+  let bWidth = 7;
 
-  let geometry = geo.cubeGeometry(bWidth);
+  let geometry = geo.ringGeometry(bWidth);
   this.mesh = new makeMesh(camera, geometry, {
     width: bWidth,
     height: bWidth
   });
 
+  const colRed = new co.shifter(co.Palette.FluRed);
+
+  this.mesh.paint('front', colRed.css());
+
   this.entity = new makeEntity
   (ctrl, this.mesh, () => {
     hero.bullets.release(this);
-  }, 0.5);
+  }, 0.5, vec3(0.0, 0.0, 20.0));
 
   let phy = this.entity.physics;
   let lif = this.entity.life;
-
 
   this.init = d => {
     this.data = { x: 0, y: 0, vDispense: vec3(0), ...d };
@@ -164,17 +175,18 @@ function makeBullet(ctrl, hero) {
 
     let { x, y, vDispense } = this.data;
 
-    x += 10;
+    let bulletDir = hero.facing();
+    
+    x += 10 * bulletDir * -1;
 
     phy.pos({ x, y, z: 0 });
-    phy.acc({ y: 0, x: -1, z: -60 });
-    phy.vel({ x: 100, y: vDispense[1], z: vDispense[2] });
+    phy.acc({ y: 0, x: 10 * bulletDir, z: 0 });
+    phy.vel({ x: 100 * bulletDir * -1, y: vDispense[1], z: vDispense[2] });
   };
 
   this.update = delta => {
     this.entity.update(delta);
-
-    // phy.pos({ z: Math.sin(u.usin(lif.alpha() * u.TAU * 0.5) * u.TAU * 4.0) * 20 });
+    phy.update(delta);
   };
 
 }

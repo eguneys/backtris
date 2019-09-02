@@ -20,7 +20,8 @@ export default function view(ctrl, g, assets) {
   function renderHero(ctrl, hero) {
 
     renderMesh(ctrl, g, hero.mesh);
-    
+
+    hero.bullets.each(_ => renderMesh(ctrl, g, _.mesh));
   }
 
   this.render = ctrl => {
