@@ -20,7 +20,12 @@ export default function physics(opts) {
     this.vel({ x: s[0], y: s[1], z: s[2] });
   };
 
-  this.move = (dir) => {
+  this.jump2 = (yHeight) => {
+    let s = -Math.sqrt(Math.abs(2 * gravity[1] * yHeight));
+    this.vel({ x: 0, y: s, z: 0 });
+  };
+
+  this.move = (dir, grounded) => {
     let x = dir[0],
         y = dir[1],
         xAcc = x * 2,
@@ -29,11 +34,22 @@ export default function physics(opts) {
     this.acc({ x: xAcc });
     this.vel({ x: xV });
 
-    let yHeight = y * gravity[1] * 6;
+    let yHeight = y * gravity[1] * 12;
 
-    if (yHeight !== 0) {
-      this.jump(0, -yHeight, 0);
+    let oldV = vel[1];
+
+
+
+
+
+    if (yHeight !== 0 && grounded) {
+        //  this.jump(0, -yHeight, 0);
+      this.jump2(yHeight);
     }
+
+    // if (yHeight === 0 && vel[1] < 30) {
+    //   vel[1] = 30;
+    // }
   };
 
   this.pos = ({ x = pos[0], y = pos[1], z = pos[2] }) => {

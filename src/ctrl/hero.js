@@ -54,7 +54,7 @@ export default function hero(ctrl) {
     if (dir[0] !== 0) {
       moveDir[0] = dir[0];
     }
-    if (dir[1] !== 1) {
+    if (dir[1] !== 0) {
       moveDir[1] = dir[1];
     }
   };
@@ -69,7 +69,7 @@ export default function hero(ctrl) {
   };
 
   const updateMovement = delta => {
-    phy.move(moveDir);
+    phy.move(moveDir, this.entity.grounded);
   };
 
   const updatePaint = delta => {

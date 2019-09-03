@@ -52,6 +52,12 @@ export default function makeEntity(ctrl, mesh, onDie, liveSecs, gravity = vec3(0
   this.applyPhysics = (delta, collisions) => {
     let update = phy.calculateUpdate(delta, collisions);
 
+    if (collisions.bottom) {
+      this.grounded = true;
+    } else {
+      this.grounded = false;
+    }
+
     phy.applyUpdate(update);
   };
   
