@@ -1,7 +1,5 @@
 import { objFilter } from '../util2';
 
-import Pool from '../pool';
-
 import * as co from '../colors';
 
 import * as u from '../util';
@@ -22,8 +20,7 @@ export default function makeTile(ctrl, tiles) {
   let heroStepAlpha = new u.interpolator(0.1),
       heroStepAlpha2 = new u.interpolator(0.1);
 
-  let frontLum = new u.interpolator(0.0);
-
+  let frontLum;
   let frontAlpha,
       colorFace;
 
@@ -40,23 +37,28 @@ export default function makeTile(ctrl, tiles) {
     case 'leftwall': 
       colorFace = 'right';
       frontAlpha = new u.interpolator(0.5);
+      frontLum = new u.interpolator(0.0);
 
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'rightwall': 
       colorFace = 'left';
       frontAlpha = new u.interpolator(0.5);
+      frontLum = new u.interpolator(0.0);
 
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'topwall':
       colorFace = 'top';
       frontAlpha = new u.interpolator(0.5);
+      frontLum = new u.interpolator(0.0);
 
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'space':
       frontAlpha = new u.interpolator(0.1);
+      frontLum = new u.interpolator(0.2);
+
       geometry = geo.planeGeometry(bWidth);
       break;
     default:
@@ -77,9 +79,9 @@ export default function makeTile(ctrl, tiles) {
   };
 
   this.bulletStep = (face) => {
-    frontAlpha.set(0.9);
     if (this.data.role === 'space') {
-      frontLum.set(0.1);
+      frontLum.set(0.4);
+      frontAlpha.set(0.3);
     } else {
       frontLum.set(0.2);
     }

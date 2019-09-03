@@ -1,49 +1,61 @@
+import * as co from '../colors';
 import * as u from '../util';
 
-import * as mat4 from '../matrix';
+import makeMesh from '../mesh';
+import * as geo from '../geometry';
+import makeLife from '../life';
 
-export default function mesh(geometry) {
+export default function block(ctrl, play, id) {
 
-  let modelMatrix = mat4.identity();
+  const { camera } = ctrl;
+  const { width, height } = ctrl.data.game;
 
-  this.geometry = () => {
+  const bWidth = 20;
 
-    let { vertices, lines } = geometry;
+  const colBlock = new co.shifter(co.Palette.SummerSky);
 
-    let model = vertices.map(vertex => {
-      return mat4.multiplyVec(modelMatrix, [...vertex, 1.0]);
+  this.init = d => {
+    this.data = { ...d };
+
+    let geometry = geo.triGeometry(bWidth);
+
+    this.mesh = new makeMesh(camera, geometry, {
+      width: bWidth,
+      height: bWidth
     });
 
-    let view = model.map(vertex =>
-      camera.project(vertex)
-    );
-
-
-    return {
-      view,
-      lines
-    };
+    this.life = new makeLife(() => {
+      play.blocks.release(this);
+    });
   };
 
-  this.updateModel = () => {
-    const { x, y, z, 
-            width,
-            height,
-            theta } = this;
+  const updateModel = delta => {
+    const { tick } = ctrl.data;
 
-    modelMatrix = mat4.translation(x,
-                                   y,
-                                   z);
+    let theta = (tick * 0.001 + id) % u.TAU;
 
-    modelMatrix = mat4.translate(modelMatrix, 
-                                 width * 0.5,
-                                 height * 0.5, 0);
+    let scale = 1.0 + Math.sin(this.life.alpha()* u.TAU) * 0.2;
 
-    modelMatrix = mat4.zRotate(modelMatrix, theta);
+    this.mesh.paint('front', colBlock
+                    .reset()
+                    .lum(Math.sin(theta) * 0.3)
+                    .css());
 
-    modelMatrix = mat4.translate(modelMatrix,
-                                 -width * 0.5,
-                                 -height * 0.5 * 0.0, 0);
+    this.mesh.updateModel({
+      x: this.data.x + u.usin(Math.cos(theta)) * 4,
+      y: this.data.y + Math.cos(u.usin(theta)) * 4,
+      z: 0,
+      scale,
+      theta: [0, theta, 0]
+    });
+  };
+
+
+
+  this.update = delta => {
+    updateModel(delta);
+
+    this.life.update(delta);
   };
  
 }

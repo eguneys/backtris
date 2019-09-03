@@ -5,7 +5,7 @@ import Pool from '../pool';
 import * as levels from '../levels';
 
 import makeTile from './tiles';
-
+import makeBlock from './block';
 import makeHero from './hero';
 
 export default function ctrl(ctrl, g) {
@@ -17,6 +17,8 @@ export default function ctrl(ctrl, g) {
   });
 
   this.hero = new makeHero(ctrl);
+
+  this.blocks = new Pool(id => new makeBlock(ctrl, this, id));
 
   const tilePos2WorldPos = pos => {
     return {
@@ -141,10 +143,21 @@ export default function ctrl(ctrl, g) {
     });
   };
 
+  const maybeSpawnBlock = u.withDelay(_ => {
+    this.blocks.acquire(_ => _.init({
+      ...tilePos2WorldPos([u.randInt(0, levels.rows), 
+                           u.randInt(0, levels.cols)]),
+    }));
+  }, 1000);
+
 
 
   this.update = delta => {
+    maybeSpawnBlock(delta);
+
     this.tiles.each(_ => _.update(delta));
+
+    this.blocks.each(_ => _.update(delta));
 
     updateHeroCollisions(delta);
     updateBulletCollisions(delta);
