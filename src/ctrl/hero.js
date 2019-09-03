@@ -39,6 +39,8 @@ export default function hero(ctrl) {
 
   const heroColor = new co.shifter(co.Palette.GreyPorc);
 
+  const rotTargetY = new u.interpolator(0.0);
+
   let moveDir = [0, 0];
 
   this.init = d => {
@@ -71,7 +73,14 @@ export default function hero(ctrl) {
 
   let gflip = false;
   const updateMovement = delta => {
+
     phy.move(moveDir, this.entity.grounded);
+    if (moveDir[0] !== 0) {
+      rotTargetY.set(u.PI * 0.05 * moveDir[0]);
+    }
+    rotTargetY.interpolate(0.1);
+    phy.rot({ y: rotTargetY.get() });
+
     if (moveDir[1] !== 0 && !gflip) {
       gflip = true;
       phy.grav(moveDir[1]);
@@ -79,12 +88,17 @@ export default function hero(ctrl) {
 
     if ((this.entity.grounded && phy.falling()) ||
         (this.entity.groundedTop && phy.flying())) {
-      phy.jump2(12 * 10);
+      if (moveDir[1] !== 1) {
+        phy.jump2(12 * 10);
+      }
     }
   };
 
   const updatePaint = delta => {
-    this.mesh.paint('front', heroColor.css());
+    this.mesh.paint('front', heroColor
+                    .reset()
+                    .lum(Math.abs(rotTargetY.get() * 0.5))
+                    .css());
   };
 
   const maybeSpawnBullet = u.withDelay(_ => {
