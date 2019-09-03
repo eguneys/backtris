@@ -21,35 +21,18 @@ export default function physics(opts) {
   };
 
   this.jump2 = (yHeight) => {
-    let s = -Math.sqrt(Math.abs(2 * gravity[1] * yHeight));
+    let s = -1 * Math.sign(gravity[1]) *
+        Math.sqrt(Math.abs(2 * gravity[1] * yHeight));
     this.vel({ x: 0, y: s, z: 0 });
   };
 
   this.move = (dir, grounded) => {
     let x = dir[0],
-        y = dir[1],
         xAcc = x * 2,
         xV = x * 30;
 
     this.acc({ x: xAcc });
     this.vel({ x: xV });
-
-    let yHeight = y * gravity[1] * 12;
-
-    let oldV = vel[1];
-
-
-
-
-
-    if (yHeight !== 0 && grounded) {
-        //  this.jump(0, -yHeight, 0);
-      this.jump2(yHeight);
-    }
-
-    // if (yHeight === 0 && vel[1] < 30) {
-    //   vel[1] = 30;
-    // }
   };
 
   this.pos = ({ x = pos[0], y = pos[1], z = pos[2] }) => {
@@ -71,6 +54,13 @@ export default function physics(opts) {
   this.vrot = ({ x = vTh[0], y = vTh[1], z = vTh[2] }) => {
     vTh = vec3(x, y, z);
   };
+
+  this.grav = dir => {
+    gravity = vec3(gravity[0], gravity[1] * dir, gravity[2]);
+  };
+
+  this.falling = () => gravity[1] > 0;
+  this.flying = () => gravity[1] < 0;
 
   this.values = (_pos = pos, _theta = theta) => {
 

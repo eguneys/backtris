@@ -58,6 +58,12 @@ export default function makeEntity(ctrl, mesh, onDie, liveSecs, gravity = vec3(0
       this.grounded = false;
     }
 
+    if (collisions.top) {
+      this.groundedTop = true;
+    } else {
+      this.groundedTop = false;
+    }
+
     phy.applyUpdate(update);
   };
   

@@ -64,12 +64,23 @@ export default function hero(ctrl) {
       moveDir[0] = 0;
     }
     if (moveDir[1] === dir[1]) {
+      gflip = false;
       moveDir[1] = 0;
     }
   };
 
+  let gflip = false;
   const updateMovement = delta => {
     phy.move(moveDir, this.entity.grounded);
+    if (moveDir[1] !== 0 && !gflip) {
+      gflip = true;
+      phy.grav(moveDir[1]);
+    }
+
+    if ((this.entity.grounded && phy.falling()) ||
+        (this.entity.groundedTop && phy.flying())) {
+      phy.jump2(12 * 10);
+    }
   };
 
   const updatePaint = delta => {
