@@ -12,7 +12,8 @@ export const Palette = {
   CelGreen: 0xff33d9b2,
   FluRed: 0xffff5252,
   Mandarin: 0xffffb142,
-  LuckyP: 0xff2c2c54
+  LuckyP: 0xff2c2c54,
+  ChileanFire: 0xffcd6133
 };
 
 export const arr = rgba => {

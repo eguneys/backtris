@@ -26,11 +26,33 @@ export default function makeEntity(ctrl, mesh, onDie, liveSecs, gravity = vec3(0
     life: liveSecs
   });
 
-  this.physics = physics;
+  let phy = this.physics = physics;
   this.life = life;
 
   this.init = d => {
     this.data = { ...d };
+  };
+
+
+  this.dimensions = delta => {
+    const pos = phy.values(),
+          posAfter = this.calculatePhysics(delta);
+
+    return {
+      before: dimensions(pos, mesh.width),
+      after: dimensions(posAfter, mesh.height)
+    };
+  };
+
+  this.calculatePhysics = delta => {
+    let { pos, theta } = phy.calculateUpdate(delta);
+    return phy.values(pos, theta);
+  };
+
+  this.applyPhysics = (delta, collisions) => {
+    let update = phy.calculateUpdate(delta, collisions);
+
+    phy.applyUpdate(update);
   };
   
   const updateModel = delta => {
@@ -45,3 +67,13 @@ export default function makeEntity(ctrl, mesh, onDie, liveSecs, gravity = vec3(0
   };
 
 }
+
+const dimensions = (pos, w, h = w) => {
+  return {
+    left: pos.x,
+    top: pos.y,
+    right: pos.x + w,
+    bottom: pos.y + h,
+    front: pos.z
+  };
+};

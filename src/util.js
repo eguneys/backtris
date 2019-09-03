@@ -44,6 +44,8 @@ export function now() {
   return Date.now();
 }
 
+export function noop() { }
+
 export function interpolate(a, b, dt = 0.2) {
   return a + (b - a) * dt;
 }

@@ -65,11 +65,11 @@ export default function ctrl(ctrl, g) {
     );
   };
 
-  const collisionsFromKeys = (collisions) => {
+  const collisionsFromKeys = f => (collisions) => {
     let collTiles = objMap(collisions, (_, key) => {
       let tile = this.data.tiles[key];
 
-      return tile.role.block;
+      return f(tile);
     });
 
     return {
@@ -80,39 +80,74 @@ export default function ctrl(ctrl, g) {
     };
   };
 
-  const updateTileFaces = (collisionKeys, collisions) => {
+  const collisionWithBlocks = collisionsFromKeys(tile => 
+    tile.role.block);
+
+  const collisionWithSpace = collisionsFromKeys(tile =>
+    tile.role.role === 'space');
+
+  const collisionsWithAll = collisionsFromKeys(tile => true);
+
+  const updateTilesForCollisions = ({bottomF = u.noop, topF = u.noop}) => (collisionKeys, collisions) => {
     if (collisions.bottom) {
       [collisionKeys['rightbottom'],
        collisionKeys['leftbottom']]
         .map(_ => this.data.tiles[_].ctrl)
-        .forEach(_ => _.heroStep());
+        .forEach(bottomF);
     } 
     if (collisions.top) {
       [collisionKeys['righttop'],
        collisionKeys['lefttop']]
         .map(_ => this.data.tiles[_].ctrl)
-        .forEach(_ => _.heroStep('bottom'));      
+        .forEach(topF);
     }
   };
 
+  const updateTileFacesForBlocks = updateTilesForCollisions({
+    bottomF: _ => _.heroStep(),
+    topF: _ => _.heroStep('bottom')
+  });
+
+  const updateTileFacesForBullets = updateTilesForCollisions({
+    bottomF: _ => _.bulletStep(),
+  });
+  
+
   const updateHeroCollisions = delta => {
-    const { before, after } = this.hero.dimensions(delta);
+    const { before, after } = this.hero.entity.dimensions(delta);
 
     const afterCollisionKeys = collisionKeys(after);
 
-    let afterCollisions = collisionsFromKeys(afterCollisionKeys);
+    let afterCollisions = collisionWithBlocks(afterCollisionKeys);
 
-    updateTileFaces(afterCollisionKeys, afterCollisions);
+    updateTileFacesForBlocks(afterCollisionKeys, afterCollisions);
 
-    this.hero.applyPhysics(delta, afterCollisions);
+    this.hero.entity.applyPhysics(delta, afterCollisions);
 
-    
   };
+
+  const updateBulletCollisions = delta => {
+    this.hero.bullets.each(_ => {
+      const { after } = _.entity.dimensions(delta);
+
+      if (after.front > width * 0.1) {
+        const afterCollisionKeys = collisionKeys(after);
+        
+        let allCollisions = collisionsWithAll(afterCollisionKeys);
+
+        updateTileFacesForBullets(afterCollisionKeys, allCollisions);
+
+      }
+    });
+  };
+
+
 
   this.update = delta => {
     this.tiles.each(_ => _.update(delta));
 
     updateHeroCollisions(delta);
+    updateBulletCollisions(delta);
 
     this.hero.update(delta);
   };

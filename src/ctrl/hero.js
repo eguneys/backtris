@@ -97,36 +97,6 @@ export default function hero(ctrl) {
     }));
   }, 100);
 
-  const dimensions = pos => {
-    return {
-      left: pos.x,
-      top: pos.y,
-      right: pos.x + heroWidth,
-      bottom: pos.y + heroHeight
-    };
-  };
-
-  this.dimensions = delta => {
-    const pos = phy.values(),
-          posAfter = this.calculatePhysics(delta);
-
-    return {
-      before: dimensions(pos),
-      after: dimensions(posAfter)
-    };
-  };
-
-  this.calculatePhysics = delta => {
-    let { pos, theta } = phy.calculateUpdate(delta);
-    return phy.values(pos, theta);
-  };
-
-  this.applyPhysics = (delta, collisions) => {
-    let update = phy.calculateUpdate(delta, collisions);
-
-    phy.applyUpdate(update);
-  };
-
   this.update = delta => {
 
     this.entity.update(delta);

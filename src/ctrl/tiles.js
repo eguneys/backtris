@@ -15,12 +15,14 @@ export default function makeTile(ctrl, tiles) {
   const { width, height } = ctrl.data.game;
 
 
-  const frontColor = new co.shifter(co.Palette.SwanWhite);
+  const frontColor = new co.shifter(co.Palette.ChileanFire);
 
   const stepColor = new co.shifter(co.Palette.LuckyP);
 
   let heroStepAlpha = new u.interpolator(0.1),
       heroStepAlpha2 = new u.interpolator(0.1);
+
+  let frontLum = new u.interpolator(0.0);
 
   let frontAlpha,
       colorFace;
@@ -74,9 +76,21 @@ export default function makeTile(ctrl, tiles) {
     }
   };
 
+  this.bulletStep = (face) => {
+    frontAlpha.set(0.9);
+    if (this.data.role === 'space') {
+      frontLum.set(0.1);
+    } else {
+      frontLum.set(0.2);
+    }
+  };
+
   const updateColors = delta => {
+    frontLum.interpolate();
+    frontAlpha.interpolate();
     heroStepAlpha.interpolate();
     heroStepAlpha2.interpolate();
+
 
     this.mesh.paint('bottom', stepColor
                     .reset()
@@ -91,6 +105,7 @@ export default function makeTile(ctrl, tiles) {
     this.mesh.paint('front', frontColor
                     .reset()
                     .alp(frontAlpha.get())
+                    .hue(frontLum.get())
                     .css());
   };
 
