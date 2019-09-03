@@ -13,46 +13,41 @@ export default function makeTile(ctrl, tiles) {
   const { width, height } = ctrl.data.game;
 
 
-  const frontColor = new co.shifter(co.Palette.ChileanFire);
+  let frontColor = new co.shifter(co.Palette.ChileanFire);
 
   const stepColor = new co.shifter(co.Palette.LuckyP);
 
   let heroStepAlpha = new u.interpolator(0.1),
       heroStepAlpha2 = new u.interpolator(0.1);
 
-  let frontLum;
-  let frontAlpha,
+  let frontLum = new u.interpolator(0.0),
+      frontAlpha = new u.interpolator(0.5),
       colorFace;
 
   this.init = d => {
     this.data = { 
       size: 30,
+      theta: 0,
       ...d };
 
     const bWidth = this.data.size;
 
     let geometry;
 
+    frontLum.target(0.0);
+    frontAlpha.target(0.5);
+
     switch (this.data.role) {
     case 'leftwall': 
       colorFace = 'right';
-      frontAlpha = new u.interpolator(0.5);
-      frontLum = new u.interpolator(0.0);
-
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'rightwall': 
       colorFace = 'left';
-      frontAlpha = new u.interpolator(0.5);
-      frontLum = new u.interpolator(0.0);
-
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'topwall':
       colorFace = 'top';
-      frontAlpha = new u.interpolator(0.5);
-      frontLum = new u.interpolator(0.0);
-
       geometry = geo.cubeGeometry(bWidth);
       break;
     case 'space':
@@ -60,6 +55,15 @@ export default function makeTile(ctrl, tiles) {
       frontLum = new u.interpolator(0.2);
 
       geometry = geo.planeGeometry(bWidth);
+      break;
+    case 'downspike':
+      frontColor = new co.shifter(co.Palette.SwanWhite);
+      geometry = geo.spikeGeometry(bWidth);
+      this.data.theta = u.PI;
+      break;
+    case 'upspike':
+      frontColor = new co.shifter(co.Palette.SwanWhite);
+      geometry = geo.spikeGeometry(bWidth);
       break;
     default:
       throw new Error("Bad tile role " + this.data.role);
@@ -115,7 +119,8 @@ export default function makeTile(ctrl, tiles) {
     this.mesh.updateModel({
       x: this.data.x,
       y: this.data.y,
-      z: 0
+      z: 0,
+      theta: [0, 0, this.data.theta]
     });
   };
 

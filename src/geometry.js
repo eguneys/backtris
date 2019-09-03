@@ -143,3 +143,39 @@ export function triGeometry(width, depth = 10) {
 
   return { vertices, lines, faces, faceIndexes };  
 }
+
+export function spikeGeometry(width, depth = 10) {
+   const vertices = [],
+        lines = [],
+        faces = [];
+
+  vertices.push([0, 0, 0]);
+  vertices.push([width*0.5, width, 0]);
+  vertices.push([width, 0, 0]);
+
+  vertices.push([0, 0, depth]);
+  vertices.push([width*0.5, width, depth]);
+  vertices.push([width, 0, depth]);
+
+
+  lines.push([0, 1]);
+  lines.push([1, 2]);
+  lines.push([2, 0]);
+
+  lines.push([0, 3]);
+  lines.push([1, 4]);
+  lines.push([2, 5]);
+
+  lines.push([3, 4]);
+  lines.push([4, 5]);
+  lines.push([5, 3]);
+
+  // front
+  faces.push([0, 1, 2, 0]);
+
+  let faceIndexes = {
+    'front': 0
+  };
+
+  return { vertices, lines, faces, faceIndexes };  
+}

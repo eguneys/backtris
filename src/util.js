@@ -3,11 +3,6 @@ export const States = {
   Play: 'play'
 };
 
-// see ./shaders/empty.frag
-export const TileStates = {
-  Empty: 0,
-  Hilight: 1
-};
 
 export const PI = Math.PI;
 export const HALFPI = PI / 2;
@@ -55,6 +50,9 @@ export function interpolator(a, b = a) {
     interpolate(dt) {
       a = interpolate(a, b, dt);
     },
+    target(x) {
+      b = x;
+    },
     set(x) {
       a = x;
     },
@@ -100,9 +98,3 @@ export const withRandomDelay = (fn, delayFn, updateFn) => {
     }
   };
 };
-
-export function eventPosition(e) {
-  if (e.clientX || e.clientX === 0) return [e.clientX, e.clientY];
-  if (e.touches && e.targetTouches[0]) return [e.targetTouches[0].clientX, e.targetTouches[0].clientY];
-  return undefined;
-}

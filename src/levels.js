@@ -22,7 +22,10 @@ export function key2pos(key) {
 const RoleCode = { ' ': 'space',
                    '{': 'leftwall',
                    '}': 'rightwall',
-                   '_': 'topwall' };
+                   '_': 'topwall',
+                   'V': 'downspike',
+                   'v': 'upspike'
+                 };
 
 const Role = {
   space: {
@@ -39,30 +42,36 @@ const Role = {
   topwall: {
     facing: 'top',
     block: true
+  },
+  downspike: {
+    kill: true
+  },
+  upspike: {
+    kill: true
   }
 };
 
 const levels = [
   `
  ____________________________
+{         vvvvvv             }
+{                            }
+{   _                 ____   }
+{                            }
+{  _      VVVVVV             }
+{                            }
+{_                           }
 {                            }
 {                            }
 {                            }
+{_____VVV   ____________vvv  }
+{                           _}
+{           _________________}
 {                            }
-{                            }
-{                            }
-{                            }
-{                            }
-{                            }
-{                            }
-{                            }
-{                            }
-{      ___                   }
 {          ____              }
-{                            }
 {  ___                       }
 {     _____      ____        }
-{            _               }
+{            _         V     }
 {____________________________}
 `
 ];

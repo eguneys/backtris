@@ -29,7 +29,7 @@ export default function physics(opts) {
   this.move = (dir, grounded) => {
     let x = dir[0],
         xAcc = x * 2,
-        xV = x * 30;
+        xV = x * 20;
 
     this.acc({ x: xAcc });
     this.vel({ x: xV });

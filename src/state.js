@@ -8,7 +8,6 @@ export default function defaults(width, height) {
   const tileWidth = width * 0.031;
 
   const game = {
-    state: u.States.Over,
     highscore: 0,
     width,
     height,
@@ -17,6 +16,7 @@ export default function defaults(width, height) {
   };
 
   return {
+    state: u.States.Over,
     game
   };
  

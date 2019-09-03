@@ -7,6 +7,7 @@ import * as levels from '../levels';
 import makeTile from './tiles';
 import makeBlock from './block';
 import makeHero from './hero';
+import makeExplosion from './explosion';
 
 export default function ctrl(ctrl, g) {
 
@@ -19,6 +20,8 @@ export default function ctrl(ctrl, g) {
   this.hero = new makeHero(ctrl);
 
   this.blocks = new Pool(id => new makeBlock(ctrl, this, id));
+
+  this.explosions = new Pool(id => new makeExplosion(ctrl, this));
 
   const tilePos2WorldPos = pos => {
     return {
@@ -38,11 +41,16 @@ export default function ctrl(ctrl, g) {
 
   this.init = d => {
     this.data = {
+      gameover: 0,
       tiles: levels.make(),
       ...d
     };
 
     this.tiles.releaseAll();
+
+    this.hero.init({
+      ...tilePos2WorldPos([levels.rows-2, levels.cols-2]),
+    });
 
     objForeach(this.data.tiles, (key, tile) => {
       const pos = levels.key2pos(key);
@@ -88,6 +96,9 @@ export default function ctrl(ctrl, g) {
   const collisionWithSpace = collisionsFromKeys(tile =>
     tile.role.role === 'space');
 
+  const collisionWithKill = collisionsFromKeys(tile =>
+    tile.role.kill);
+
   const collisionsWithAll = collisionsFromKeys(tile => true);
 
   const updateTilesForCollisions = ({bottomF = u.noop, topF = u.noop}) => (collisionKeys, collisions) => {
@@ -120,12 +131,25 @@ export default function ctrl(ctrl, g) {
 
     const afterCollisionKeys = collisionKeys(after);
 
-    let afterCollisions = collisionWithBlocks(afterCollisionKeys);
+    let blockCollisions = collisionWithBlocks(afterCollisionKeys);
 
-    updateTileFacesForBlocks(afterCollisionKeys, afterCollisions);
+    updateTileFacesForBlocks(afterCollisionKeys, blockCollisions);
 
-    this.hero.entity.applyPhysics(delta, afterCollisions);
+    this.hero.entity.applyPhysics(delta, blockCollisions);
 
+    let spikeCollisions = collisionWithKill(afterCollisionKeys);
+
+    if (spikeCollisions.top || spikeCollisions.bottom) {
+      this.explosions.acquireLimit(_ => _.init({
+        x: after.left,
+        y: after.top,
+        z: 0
+      }), 3);
+      this.hero.hitSpike();
+      if (this.data.gameover === 0) {
+        this.data.gameover = u.now();
+      }
+    }
   };
 
   const updateBulletCollisions = delta => {
@@ -151,13 +175,25 @@ export default function ctrl(ctrl, g) {
   }, 1000);
 
 
+  const maybeEndPlay = delta => {
+    if (this.data.gameover > 0) {
+      u.ensureDelay(this.data.gameover, () => {
+        this.data.gameover = 0;
+        ctrl.data.state = u.States.Over;
+      }, 600);
+    }
+  };
 
   this.update = delta => {
     maybeSpawnBlock(delta);
 
+    maybeEndPlay(delta);
+
     this.tiles.each(_ => _.update(delta));
 
     this.blocks.each(_ => _.update(delta));
+
+    this.explosions.each(_ => _.update(delta));
 
     updateHeroCollisions(delta);
     updateBulletCollisions(delta);

@@ -24,12 +24,18 @@ export default function view(ctrl, g, assets) {
     hero.bullets.each(_ => renderMesh(ctrl, g, _.mesh));
   }
 
+  function renderExplosion(ctrl, explosion) {
+    explosion.particles.each(_ => renderMesh(ctrl, g, _.mesh));
+  }
+
   this.render = ctrl => {
     const playCtrl = ctrl.play;
 
     playCtrl.tiles.each(_ => renderTile(ctrl, _));
 
     playCtrl.blocks.each(_ => renderBlock(ctrl, _));
+
+    playCtrl.explosions.each(_ => renderExplosion(ctrl, _));
 
     renderHero(ctrl, playCtrl.hero);
 

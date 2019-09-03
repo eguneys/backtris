@@ -17,7 +17,7 @@ export default function hero(ctrl) {
   const { camera } = ctrl;
   const { width, height } = ctrl.data.game;
 
-  let heroWidth = 20,
+  let heroWidth = 10,
       heroHeight = heroWidth;
 
   //let geometry = geo.cubeGeometry(heroWidth);
@@ -41,18 +41,31 @@ export default function hero(ctrl) {
 
   const rotTargetY = new u.interpolator(0.0);
 
+  const alphaTarget = new u.interpolator(0.9);
+
+  let dead;
   let moveDir = [0, 0];
 
   this.init = d => {
     this.data = { ...d };
-  };
 
+    dead = false;
+    rotTargetY.target(0.0);
+    alphaTarget.target(0.9);
+
+    let { x, y } = this.data;
+
+    phy.pos({ x, y });
+  };
 
   this.facing = () => {
     return moveDir[0];
   };
 
   this.move = dir => {
+    if (dead) {
+      return;
+    }
     if (dir[0] !== 0) {
       moveDir[0] = dir[0];
     }
@@ -71,7 +84,13 @@ export default function hero(ctrl) {
     }
   };
 
+  this.hitSpike = () => {
+    alphaTarget.target(0.0);
+    dead = true;
+  };
+
   let gflip = false;
+  let jumpScale = 1.0;
   const updateMovement = delta => {
 
     phy.move(moveDir, this.entity.grounded);
@@ -79,6 +98,7 @@ export default function hero(ctrl) {
       rotTargetY.set(u.PI * 0.05 * moveDir[0]);
     }
     rotTargetY.interpolate(0.1);
+
     phy.rot({ y: rotTargetY.get() });
 
     if (moveDir[1] !== 0 && !gflip) {
@@ -89,14 +109,21 @@ export default function hero(ctrl) {
     if ((this.entity.grounded && phy.falling()) ||
         (this.entity.groundedTop && phy.flying())) {
       if (moveDir[1] !== 1) {
-        phy.jump2(12 * 10);
+        phy.jump2(jumpScale * 6 * 10);
+        jumpScale = 1.0;
+      } else {
+        phy.jump2(0.25 * 6 * 10);
+        jumpScale = 2.0;
       }
     }
   };
 
   const updatePaint = delta => {
+    alphaTarget.interpolate();
+
     this.mesh.paint('front', heroColor
                     .reset()
+                    .alp(alphaTarget.get())
                     .lum(Math.abs(rotTargetY.get() * 0.5))
                     .css());
   };
