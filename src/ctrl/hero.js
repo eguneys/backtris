@@ -46,8 +46,18 @@ export default function hero(ctrl) {
   let dead;
   let moveDir = [0, 0];
 
+  let garea,
+      gflip,
+      jumpScale;
+
   this.init = d => {
     this.data = { ...d };
+
+    garea = true;
+    gflip = false;
+    jumpScale = 1.0;
+
+    phy.grav(10);
 
     dead = false;
     rotTargetY.target(0.0);
@@ -89,8 +99,10 @@ export default function hero(ctrl) {
     dead = true;
   };
 
-  let gflip = false;
-  let jumpScale = 1.0;
+  this.hitGravity = (g) => {
+    garea = g;
+  };
+
   const updateMovement = delta => {
 
     phy.move(moveDir, this.entity.grounded);
@@ -101,10 +113,14 @@ export default function hero(ctrl) {
 
     phy.rot({ y: rotTargetY.get() });
 
-    if (moveDir[1] !== 0 && !gflip) {
+    if (garea && moveDir[1] === -1 && !gflip) {
       gflip = true;
-      phy.grav(moveDir[1]);
+      phy.grav(phy.gravity() * -1);
     }
+
+    // if (!garea) {
+    //   phy.grav(10);
+    // }
 
     if ((this.entity.grounded && phy.falling()) ||
         (this.entity.groundedTop && phy.flying())) {

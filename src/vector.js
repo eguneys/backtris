@@ -21,3 +21,7 @@ export function inverse(v) {
 export function addScale(v1, v2, s) {
   return add(v1, scale(v2, s));
 }
+
+export function copy(v) {
+  return [v[0], v[1], v[2]];
+}

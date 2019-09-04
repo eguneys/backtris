@@ -99,6 +99,9 @@ export default function ctrl(ctrl, g) {
   const collisionWithKill = collisionsFromKeys(tile =>
     tile.role.kill);
 
+  const collisionWithGravity = collisionsFromKeys(tile =>
+    tile.role.gravity);
+
   const collisionsWithAll = collisionsFromKeys(tile => true);
 
   const updateTilesForCollisions = ({bottomF = u.noop, topF = u.noop}) => (collisionKeys, collisions) => {
@@ -136,6 +139,10 @@ export default function ctrl(ctrl, g) {
     updateTileFacesForBlocks(afterCollisionKeys, blockCollisions);
 
     this.hero.entity.applyPhysics(delta, blockCollisions);
+
+    let gravityCollisions = collisionWithGravity(afterCollisionKeys);
+
+    this.hero.hitGravity(gravityCollisions.top);
 
     let spikeCollisions = collisionWithKill(afterCollisionKeys);
 

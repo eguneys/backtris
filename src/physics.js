@@ -55,9 +55,11 @@ export default function physics(opts) {
     vTh = vec3(x, y, z);
   };
 
-  this.grav = dir => {
-    gravity = vec3(gravity[0], gravity[1] * dir, gravity[2]);
+  this.grav = grav => {
+    gravity[1] = grav;
   };
+
+  this.gravity = () => gravity[1];
 
   this.falling = () => gravity[1] > 0;
   this.flying = () => gravity[1] < 0;

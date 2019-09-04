@@ -13,7 +13,7 @@ export default function makeTile(ctrl, tiles) {
   const { width, height } = ctrl.data.game;
 
 
-  let frontColor = new co.shifter(co.Palette.ChileanFire);
+  let frontColor;
 
   const stepColor = new co.shifter(co.Palette.LuckyP);
 
@@ -30,6 +30,8 @@ export default function makeTile(ctrl, tiles) {
       theta: 0,
       ...d };
 
+    frontColor = new co.shifter(co.Palette.ChileanFire);
+
     const bWidth = this.data.size;
 
     let geometry;
@@ -38,6 +40,18 @@ export default function makeTile(ctrl, tiles) {
     frontAlpha.target(0.5);
 
     switch (this.data.role) {
+    case 'space':
+      frontAlpha = new u.interpolator(0.1);
+      frontLum = new u.interpolator(0.2);
+
+      geometry = geo.planeGeometry(bWidth);
+      break;
+    case 'gravity':
+      frontColor = new co.shifter(co.Palette.CelGreen);
+      frontAlpha = new u.interpolator(0.8);
+      frontLum = new u.interpolator(0.0);
+      geometry = geo.planeGeometry(bWidth);
+      break;
     case 'leftwall': 
       colorFace = 'right';
       geometry = geo.cubeGeometry(bWidth);
@@ -49,12 +63,6 @@ export default function makeTile(ctrl, tiles) {
     case 'topwall':
       colorFace = 'top';
       geometry = geo.cubeGeometry(bWidth);
-      break;
-    case 'space':
-      frontAlpha = new u.interpolator(0.1);
-      frontLum = new u.interpolator(0.2);
-
-      geometry = geo.planeGeometry(bWidth);
       break;
     case 'downspike':
       frontColor = new co.shifter(co.Palette.SwanWhite);
