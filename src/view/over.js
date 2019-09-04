@@ -44,7 +44,7 @@ export default function over(ctrl, g) {
   };
 
   const renderScore = ctrl => {
-    if (ctrl.play.data.goal) {
+    if (ctrl.play.data && ctrl.play.data.goal) {
       text(g, {
         text: "Nice you hit the goal!",
         font: '40px Arial',

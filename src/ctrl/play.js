@@ -45,7 +45,7 @@ export default function ctrl(ctrl, g) {
   let heroTile = [levels.rows - 2, levels.cols - 2];
   let goalTile = [2, levels.cols - 6];
 
-  goalTile = [levels.rows - 2, levels.cols - 8];
+  // goalTile = [levels.rows - 2, levels.cols - 8];
 
   let goalKey = levels.pos2key(goalTile);
 
