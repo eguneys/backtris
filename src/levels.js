@@ -82,11 +82,11 @@ const levels = [
 
 const makeRole = (function roleMaker() {
   let id = 1;
-  return function(roleCode) {
+  return function(roleCode, key) {
     id++;
 
     const role = RoleCode[roleCode];
-    return { key: id, role, ...Role[role] };
+    return { id, key, role, ...Role[role] };
   };
 })();
 
@@ -112,7 +112,7 @@ export const read = levelStr => {
     line.forEach((tileChar, col) => {
       let pos = [row, col];
       res[pos2key(pos)] = {
-        role: makeRole(tileChar)
+        role: makeRole(tileChar, pos2key(pos))
       };
     });
   });

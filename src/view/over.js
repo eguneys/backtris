@@ -43,11 +43,21 @@ export default function over(ctrl, g) {
 
   };
 
+  const renderScore = ctrl => {
+    if (ctrl.play.data.goal) {
+      text(g, {
+        text: "Nice you hit the goal!",
+        font: '40px Arial',
+        x: width * 0.5,
+        y: height * 0.4
+      });
+    }
+  };
+
   const renderOver = ctrl => {
 
-    g.raw(ctx => {
-      ctx.fillStyle = "black";
-    });
+    renderScore(ctrl);
+
 
     renderInfo(ctrl);
 

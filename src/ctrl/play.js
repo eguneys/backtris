@@ -1,4 +1,4 @@
-import { objForeach, objMap } from '../util2';
+import { objFilter, objForeach, objMap } from '../util2';
 import * as u from '../util';
 import Pool from '../pool';
 
@@ -7,6 +7,7 @@ import * as levels from '../levels';
 import makeTile from './tiles';
 import makeBlock from './block';
 import makeHero from './hero';
+import makeGoal from './goal';
 import makeExplosion from './explosion';
 
 export default function ctrl(ctrl, g) {
@@ -22,6 +23,8 @@ export default function ctrl(ctrl, g) {
   this.blocks = new Pool(id => new makeBlock(ctrl, this, id));
 
   this.explosions = new Pool(id => new makeExplosion(ctrl, this));
+
+  this.goal = new makeGoal(ctrl);
 
   const tilePos2WorldPos = pos => {
     return {
@@ -39,9 +42,17 @@ export default function ctrl(ctrl, g) {
     ];
   };
 
+  let heroTile = [levels.rows - 2, levels.cols - 2];
+  let goalTile = [2, levels.cols - 6];
+
+  goalTile = [levels.rows - 2, levels.cols - 8];
+
+  let goalKey = levels.pos2key(goalTile);
+
   this.init = d => {
     this.data = {
       gameover: 0,
+      goal: false,
       tiles: levels.make(),
       ...d
     };
@@ -49,7 +60,11 @@ export default function ctrl(ctrl, g) {
     this.tiles.releaseAll();
 
     this.hero.init({
-      ...tilePos2WorldPos([levels.rows-2, levels.cols-2]),
+      ...tilePos2WorldPos(heroTile),
+    });
+
+    this.goal.init({
+      ...tilePos2WorldPos(goalTile),
     });
 
     objForeach(this.data.tiles, (key, tile) => {
@@ -102,6 +117,10 @@ export default function ctrl(ctrl, g) {
   const collisionWithGravity = collisionsFromKeys(tile =>
     tile.role.gravity);
 
+  const collisionWithGoal = collisionsFromKeys(tile =>
+    tile.role.key === goalKey
+  );
+
   const collisionsWithAll = collisionsFromKeys(tile => true);
 
   const updateTilesForCollisions = ({bottomF = u.noop, topF = u.noop}) => (collisionKeys, collisions) => {
@@ -139,6 +158,20 @@ export default function ctrl(ctrl, g) {
     updateTileFacesForBlocks(afterCollisionKeys, blockCollisions);
 
     this.hero.entity.applyPhysics(delta, blockCollisions);
+
+    let goalCollisions = collisionWithGoal(afterCollisionKeys);
+
+    if (Object.keys(objFilter(goalCollisions, (_, v) => v)).length > 0) {
+
+      this.goal.hit();
+
+      this.data.goal = true;
+
+      if (this.data.gameover === 0) {
+        this.data.gameover = u.now();
+      }
+
+    }
 
     let gravityCollisions = collisionWithGravity(afterCollisionKeys);
 
@@ -193,7 +226,6 @@ export default function ctrl(ctrl, g) {
 
   this.update = delta => {
     maybeSpawnBlock(delta);
-
     maybeEndPlay(delta);
 
     this.tiles.each(_ => _.update(delta));

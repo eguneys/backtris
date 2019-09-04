@@ -3,6 +3,8 @@ import * as G from '../graphics';
 import * as co from '../colors';
 import * as u from '../util';
 
+import { text } from '../text';
+
 import { renderMesh } from './util';
 
 export default function view(ctrl, g, assets) {
@@ -28,6 +30,22 @@ export default function view(ctrl, g, assets) {
     explosion.particles.each(_ => renderMesh(ctrl, g, _.mesh));
   }
 
+  function renderGoal(ctrl, goal) {
+
+    if (!goal.data) {
+      return;
+    }
+
+    const [x, y] = goal.view();
+
+    text(g, {
+      text: 'G',
+      font: '40px Arial',
+      color: goal.material(),
+      x, y
+    });
+  }
+
   this.render = ctrl => {
     const playCtrl = ctrl.play;
 
@@ -39,6 +57,7 @@ export default function view(ctrl, g, assets) {
 
     renderHero(ctrl, playCtrl.hero);
 
+    renderGoal(ctrl, playCtrl.goal);
   };
 
 }
